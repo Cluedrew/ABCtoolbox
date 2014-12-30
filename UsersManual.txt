@@ -1,0 +1,25 @@
+Details of ABC Tool Box for end users:
+
+This manual contains information on all "public members" of the tool box, all
+the private members used internally are omited.
+
+All code names (functions, classes, varaibles and so on) that are defined by
+the ABCtoolbox are defined within the abc namespace and so must be accessed
+with abc::NAME or by a using declaration. All terms defined by ABCtoolbox
+during the pre-proccessor run begin with ABC_.
+
+ABCtoolbox:
+
+ABCmake:
+
+ABCglobal:
+
+ABCio:
+
+ABCerror:
+
+ABCterminal:
+
+ABCgraphical:
+
+ABCfile:

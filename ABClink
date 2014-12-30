@@ -1,0 +1,8 @@
+# Creates a link to the currant directory for easy access.
+
+# Check for good input.
+if [ $# != 2 ]; then
+  exit 1
+elif [ ! -d $1 ]; then
+
+fi
