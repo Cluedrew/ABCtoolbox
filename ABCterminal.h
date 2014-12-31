@@ -3,8 +3,9 @@
 
 // Allows for greater control of the termainal.
 
-/* The terminal class allows for grid based use of consol, instead of the command
- * line style it usually has.
+#include "private/termainal.h"
+/* The termainal class allows for grid based use of consol, instead of the
+ * command line style it usually has.
  */
 
 #endif//ABC_TERMINAL_H
