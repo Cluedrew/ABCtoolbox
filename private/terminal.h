@@ -1,7 +1,7 @@
 #ifndef ABCDEF_TERMINAL_H
 #define ABCDEF_TERMINAL_H
 
-/* The termainal class allows for grid based use of consol, instead of the
+/* The Terminal class allows for grid based use of consol, instead of the
  * command line style it usually has.
  */
 
@@ -9,20 +9,19 @@
 
 namespace abc
 {
-class Termainal
+class Terminal
 {
 private:
-  Termainal * instance;
-  
-  Termainal ();
+  static Terminal * instance;
   
 protected:
+  Terminal ();
+  
 public:
-  virtual ~Termainal ();
+  virtual ~Terminal ();
   
-  static bool CreateTermainal ();
-  
-  static Termainal * GetInstance ();
+  static Terminal * CreateTerminal ();
+  static Terminal * GetInstance ();
 };
 
 }

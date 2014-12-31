@@ -13,8 +13,8 @@ struct loc
   int x;
   int y;
   
-  //int R();
-  //int C();
+  int R() {return y;}
+  int C() {return x;}
 };
 
 // frame structure:
@@ -25,8 +25,8 @@ struct frame
   int w;
   int h;
   
-  //int R();
-  //int C();
+  int R() {return y;}
+  int C() {return x;}
 };
 
 }
