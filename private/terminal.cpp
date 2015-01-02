@@ -13,7 +13,7 @@
  * This only has basic features*, although the singleton nature of this
  * class is heavily enforced ncurses still has global access, so inherited
  * classes are free to add extra features on that way.
- * *What counts as a basic feature is prown to expainding.
+ * * Simple things that ncurses provides, so this is just a wrapper.
  */
 
 #include <ncurses.h>
@@ -38,6 +38,13 @@ Terminal::Terminal ()
     instance = this;
   
   // Start ncurses.
+  initscr();
+  // Do not wait for \n characters. (But leave ^C, ^Z... alone.)
+  cbreak();
+/*
+  // Activate the keypad.
+  keypad(stdscr, TRUE);
+ */
 }
 
 Terminal::~Terminal ()
@@ -46,6 +53,7 @@ Terminal::~Terminal ()
   instance = nullptr;
   
   // Close ncurses.
+  endwin();
 }
 
 
@@ -65,9 +73,44 @@ Terminal * Terminal::GetInstance ()
 
 
 // Implementation Functions:==================================================
+
 // Option Functions:==========================================================
 
+//
+void Terminal::RapidInput (bool rapid)
+{
+  if (rapid)
+    cbreak();
+  else
+    nocbreak();
+}
+
+/* Removed, I do not consiter this "basic".
+void Terminal::StdControlChars (bool std)
+{
+  if (std)
+    raw();
+  else
+    noraw();
+}*/
+
+// Control wheither the screen echos the users input. Starts showing echo.
+void Terminal::ShowEcho (bool show)
+{
+  if (show)
+    echo();
+  else
+    noecho();
+}
+
 // Control Functions:=========================================================
+
+// Update the terminal display to show any changes written to it.
+void Terminal::Refresh ()
+{
+  refresh();
+  // refresh might return an int, see what that means.
+}
 
 // Output Functions:==========================================================
 
