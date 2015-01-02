@@ -39,12 +39,8 @@ Terminal::Terminal ()
   
   // Start ncurses.
   initscr();
-  // Do not wait for \n characters. (But leave ^C, ^Z... alone.)
+  // Do not wait for \n characters.
   cbreak();
-/*
-  // Activate the keypad.
-  keypad(stdscr, TRUE);
- */
 }
 
 Terminal::~Terminal ()
@@ -103,6 +99,11 @@ void Terminal::ShowEcho (bool show)
     noecho();
 }
 
+/*
+  // Activate the keypad.
+  keypad(stdscr, TRUE);
+ */
+
 // Control Functions:=========================================================
 
 // Update the terminal display to show any changes written to it.
@@ -110,6 +111,29 @@ void Terminal::Refresh ()
 {
   refresh();
   // refresh might return an int, see what that means.
+}
+
+//
+loc cursur ()
+{
+  int x, y;
+  getyx(y,x);
+  loc fin = {x,y};
+  return fin;
+}
+void cursur (int & x, int & y)
+{
+  getyx(y,x);
+}
+
+//
+void move (loc pos)
+{
+  
+}
+void move (int x, int y)
+{
+  
 }
 
 // Output Functions:==========================================================

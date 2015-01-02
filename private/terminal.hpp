@@ -75,6 +75,9 @@ public:
    * Return:
    */
   
+  Print(char);
+  Print(char const *);
+  Print(std::string);
   
   /*
    * Prams.:
