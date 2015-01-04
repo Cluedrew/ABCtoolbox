@@ -52,7 +52,7 @@ public:
   
   
   
-  void Refresh ();
+  void Refresh (void);
   /* Update the terminal display to show any changes written to it.
    * Prams.: void
    * Effect: Refresh the entire terminal.
@@ -61,23 +61,37 @@ public:
   
   
   
-  int GetCh();
+  int GetCh(void);
   /*
    * Prams.:
    * Effect:
    * Return:
    */
   
-  PutCh(char);
+  void PutCh(int);
   /*
    * Prams.:
    * Effect:
    * Return:
    */
   
-  Print(char);
-  Print(char const *);
-  Print(std::string);
+  void Print(char);
+  void Print(char const *);
+  void Print(std::string);
+  /*
+   * Prams.:
+   * Effect:
+   * Return:
+   */
+  
+  char         ReadChar();
+  char const * ReadCharStr ();
+  std::string  ReadString();
+  /*
+   * Prams.:
+   * Effect:
+   * Return:
+   */
   
   /*
    * Prams.:
