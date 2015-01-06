@@ -1,5 +1,5 @@
-#ifndef ABCDEF_TERMINAL_H
-#define ABCDEF_TERMINAL_H
+#ifndef ABCDEF_TERMINAL_HPP
+#define ABCDEF_TERMINAL_HPP
 
 /* The Terminal class allows for grid based use of consol, instead of the
  * command line style it usually has.
@@ -28,10 +28,10 @@ public:
    */
   
   static Terminal * GetInstance ();
-  /*
-   * Prams.:
-   * Effect:
-   * Return:
+  /* Return any existing instance of a Terminal.
+   * Prams.: void
+   * Effect: void
+   * Return: A Terminal pointer to the exist terminal.
    */
   
   
@@ -84,9 +84,9 @@ public:
    * Return:
    */
   
-  char         ReadChar();
+  char         ReadChar ();
   char const * ReadCharStr ();
-  std::string  ReadString();
+  std::string  ReadString ();
   /*
    * Prams.:
    * Effect:
@@ -102,4 +102,4 @@ public:
 
 }
 
-#endif//ABCDEF_TERMINAL_H
+#endif//ABCDEF_TERMINAL_HPP
