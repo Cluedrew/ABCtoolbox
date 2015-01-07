@@ -16,10 +16,17 @@ Header guards:
 Public files just use a standard all caps, underscores implace of symbols and
 spaces. Internal files add DEF after the ABC.
 
+Just be glad guard is 'g'uard and not 'j'uard or we would have:
 ABC_DEF_GH_IJ_: ABC DEFinition, Global Header, Interface Juard.
 
+File Structure:===============================================================
+
+ABCtoolbox: Main directory.
+|
+|private: The "private members" of the tool box. In other words the
+|| implementation of system.
+
 Public Headers:===============================================================
-ABCtoolbox:
 
 ABCmake:
 
@@ -35,6 +42,17 @@ ABCgraphical:
 
 ABCfile:
 
-ABCffscanner: Provides a class that can be used to scan formated files for input.
+ABCffscanner: Provides a class that can be used to scan formated files for
+input.
 
 Internal Headers:=============================================================
+
+terminal.hpp:
+
+structures.hpp:
+
+ff-scanner-base.hpp:
+
+ff-static-base.hpp:
+
+output.hpp:

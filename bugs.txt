@@ -1,1 +1,2 @@
- 
+Bugs:
+Terminal::Terminal() doesn't through a proper exception when it fails.

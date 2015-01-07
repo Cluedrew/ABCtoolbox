@@ -1,3 +1,4 @@
+#! /bin/bash
 # Creates a link to the currant directory for easy access.
 
 # Check for good input.
@@ -6,3 +7,8 @@ if [ $# != 2 ]; then
 elif [ ! -d $1 ]; then
 
 fi
+
+### Alt:
+
+# Creates a link from a directory searched by the g++ -l flag (/user/bin ?)
+# to where the objects/headers for ABC Tool Box are.

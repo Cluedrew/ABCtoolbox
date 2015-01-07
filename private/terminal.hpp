@@ -5,6 +5,8 @@
  * command line style it usually has.
  */
 
+#include <string>
+
 
 
 namespace abc
@@ -35,19 +37,28 @@ public:
    */
   
   
-  
-  RapidInput (bool rapid = true);
-  /*
-   * Prams.:
-   * Effect:
-   * Return:
+  /* All option functions default to the starting value. 
    */
   
-  ShowEcho (bool show = true);
-  /*
+  void RapidInput (bool rapid = true);
+  /* Use input immediately or wait for a newline command line style.
+   * Prams.: 
+   * Effect:
+   * Return: void
+   */
+  
+  void StdControlChars (bool use = true);
+  /* Choose to use the standard control character behavours or to override them.
    * Prams.:
    * Effect:
-   * Return:
+   * Return: void
+   */
+  
+  void ShowEcho (bool show = true);
+  /* Control wheither to show the echo of the users input or hide it.
+   * Prams.:
+   * Effect:
+   * Return: void
    */
   
   
@@ -57,6 +68,14 @@ public:
    * Prams.: void
    * Effect: Refresh the entire terminal.
    * Return: void
+   */
+  
+  loc Cursur ();
+  void Cursur (int & x, int & y);
+  /* Get information on the cursur's location.
+   * Prams.:
+   * Effect:
+   * Return:
    */
   
   
@@ -85,7 +104,6 @@ public:
    */
   
   char         ReadChar ();
-  char const * ReadCharStr ();
   std::string  ReadString ();
   /*
    * Prams.:

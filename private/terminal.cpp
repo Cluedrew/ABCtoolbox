@@ -72,7 +72,7 @@ Terminal * Terminal::GetInstance ()
 
 // Option Functions:==========================================================
 
-//
+// Control wheither to show the echo of the users input or hide it.
 void Terminal::RapidInput (bool rapid)
 {
   if (rapid)
@@ -81,14 +81,14 @@ void Terminal::RapidInput (bool rapid)
     nocbreak();
 }
 
-/* Removed, I do not consiter this "basic".
-void Terminal::StdControlChars (bool std)
+// Choose to use the standard control character behavours or to override them.
+void Terminal::StdControlChars (bool use)
 {
-  if (std)
-    raw();
-  else
+  if (use)
     noraw();
-}*/
+  else
+    raw();
+}
 
 // Control wheither the screen echos the users input. Starts showing echo.
 void Terminal::ShowEcho (bool show)
@@ -113,15 +113,15 @@ void Terminal::Refresh ()
   // refresh might return an int, see what that means.
 }
 
-//
-loc cursur ()
+// Get the cursur's location in the terminal.
+loc Cursur ()
 {
   int x, y;
   getyx(y,x);
   loc fin = {x,y};
   return fin;
 }
-void cursur (int & x, int & y)
+void Cursur (int & x, int & y)
 {
   getyx(y,x);
 }
