@@ -151,4 +151,4 @@ bool Terminal::MoveC (loc const & l)
 
 // Input Functions:===========================================================
 
-}
+}//abc

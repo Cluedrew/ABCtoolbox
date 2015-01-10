@@ -20,7 +20,7 @@ class FFScanner
 private:
   FFStaticBase * format;
   std::ifstream file;
-  int position;
+  unsigned int position;
   
   // Consiter added some "access wrappers".
   // char FChar(int at);
@@ -35,7 +35,16 @@ public:
   //FFScanner (std::string const & format, std::string const & file);
   //FFScanner (FFScannerBase const & other, std::string const & file);
   
-  virtual ~FFScanner() =0;
+  virtual ~FFScanner();
+  
+  // static bool CheckFormat(std::string const & format);
+  /* Make sure that ther
+   * Prams.: A string containing a file format.
+   * Effect: void
+   * Return: True if the format is valid, false otherwise.
+   */
+  
+  
   
   bool Open(std::string file);
   /* 
@@ -58,7 +67,19 @@ public:
    * Return:
    */
   
-  FFScanner operator>>
+  // Extraction Operator Overloads
+  FFScanner & operator>> (char const &);
+  FFScanner & operator>> (char const *);
+  FFScanner & operator>> (std::string);
+  /* These can be used to move forward in the format.
+   * Prams.:
+   * Effect:
+   * Return:
+   */
+  
+  //bool operator bool ();
+  
+  //void Clear(); clear error flags.
 };
 
 }

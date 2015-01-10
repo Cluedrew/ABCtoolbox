@@ -15,4 +15,5 @@ FFStaticBase::~FFStaticBase ()
 // Implementation functions: =================================================
 
 // Turns out there are none, it is all handled by the scanner.
-}
+
+}//abc

@@ -16,7 +16,7 @@ class FFStaticBase
   // The class is completely private, only allowing FFScanner to use it.
   friend class FFScanner;
   
-  int uses;
+  unsigned int uses;
   std::string const format;
   
   FFStaticBase (std::string const & format_);
