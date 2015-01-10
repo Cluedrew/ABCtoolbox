@@ -13,11 +13,11 @@ namespace abc
 {
 class FFStaticBase
 {
-  // The class is completely private, only allowing FFScannerBase to use it.
-  friend class FFScannerBase;
+  // The class is completely private, only allowing FFScanner to use it.
+  friend class FFScanner;
   
   int uses;
-  std::string format;
+  std::string const format;
   
   FFStaticBase (std::string const & format_);
   

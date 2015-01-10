@@ -30,6 +30,7 @@ FFScannerBase::~FFScannerBase ()
 
 
 // operator overload =========================================================
+// This got put here early because it deals with the format pointer.
 FFScannerBase const & FFScannerBase::operator= (FFScannerBase const & other)
 {
   if (this == &other)
@@ -44,5 +45,7 @@ FFScannerBase const & FFScannerBase::operator= (FFScannerBase const & other)
   
   return *this;
 }
+
+// Implementation Functions: =================================================
 
 }

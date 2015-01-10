@@ -4,8 +4,8 @@
 # The names of all of the "tools":
 TOOLLIST=
 
-# %_OBJ & %_LIB hold, respecively, all the objects and libraries used to create %.
-
+# %_OBJ & %_LIB hold, respecively, all the objects and libraries used
+# to create % from TOOLLIST, all tools in TOOLLIST must have both.
 
 
 # Compiler Varaibles:
@@ -29,14 +29,25 @@ CODEDIR=private
 .PHONY : all
 .SECONDEXPANSION :
 
-# Transform TOOLLIST into a usable form.
+# Internal Varaibles.
+FIN_OBJ=$(patsubst %,$(INTDIR)/$(TOOLLIST).o)
+ALL_OBJ=$(sort $(suffix $(foreach tool,$(TOOLLIST),$(tool_OBJ)),.o))
 
 # Rules:
 all : $(TOOLLIST)
 
-$(TOOLLIST) : $$@_OBJ
+$(TOOLLIST) : $$($$@_OBJ)
 #object : $(object_OBJ)
 #	$(LINK) $(LINKFLAGS) $^ $(object_LIB) -o $@
 
 # Missing the evaluation of all the object lists
-$(sort $(suffix $(TOOLLIST),_OBJ)) : $$(subs $$@
+$(ALL_OBJ) : $$(subs $$@
+
+# Directory creation. Only INTDIR should ever have to be made.
+$(INTDIR) $(OBJDIR) $(CODEDIR) :
+	mkdir $@
+
+# Flow:
+# List of tools to compile in TOOLLIST. Get the objects the depend of from the
+# header files of the same name and compile them into object files of the same
+# name (basename in both cases).

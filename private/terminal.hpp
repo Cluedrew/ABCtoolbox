@@ -61,6 +61,13 @@ public:
    * Return: void
    */
   
+  //void UseKeypad (bool use = true);
+  /* [Is that the most approprate name?]
+   * Prams.:
+   * Effect:
+   * Return: void
+   */
+  
   
   
   void Refresh (void);
@@ -73,6 +80,14 @@ public:
   loc Cursur ();
   void Cursur (int & x, int & y);
   /* Get information on the cursur's location.
+   * Prams.:
+   * Effect:
+   * Return:
+   */
+  
+  bool MoveC (int const & x, int const & y);
+  bool MoveC (loc const & l);
+  /* Move the cursur to a set x,y coordinates on the terminal.
    * Prams.:
    * Effect:
    * Return:

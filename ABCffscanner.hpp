@@ -6,6 +6,8 @@
 
 /* FFScanner is the main class used to scan from files.
  * 
+ * For your convenunce most functions that require strings will accept std
+ * library string objects or c-strings
  */
 
 /* In the format is specified by a string of characters.

@@ -41,6 +41,7 @@ Terminal::Terminal ()
   initscr();
   // Do not wait for \n characters.
   cbreak();
+  // Activate the keypad. keypad(stdscr, TRUE);
 }
 
 Terminal::~Terminal ()
@@ -99,10 +100,16 @@ void Terminal::ShowEcho (bool show)
     noecho();
 }
 
-/*
-  // Activate the keypad.
-  keypad(stdscr, TRUE);
- */
+/*/
+void Terminal::UseKeypad (bool use)
+{
+  if (use)
+    keypad(stdscr, TRUE);
+  else
+    keypad(stdscr, FALSE);
+}*/
+
+
 
 // Control Functions:=========================================================
 
@@ -114,26 +121,30 @@ void Terminal::Refresh ()
 }
 
 // Get the cursur's location in the terminal.
-loc Cursur ()
+loc Terminal::Cursur ()
 {
   int x, y;
   getyx(y,x);
   loc fin = {x,y};
   return fin;
 }
-void Cursur (int & x, int & y)
+void Terminal::Cursur (int & x, int & y)
 {
   getyx(y,x);
 }
 
-//
-void move (loc pos)
+// Move the cursur to a set x,y coordinates on the terminal.
+bool Terminal::MoveC (int const & x, int const & y)
 {
-  
+  move(y, x);
+  return true;
+  // ERR == -1 as error code?
 }
-void move (int x, int y)
+bool Terminal::MoveC (loc const & l)
 {
-  
+  move(l.y, l.x);
+  return true;
+  // ERR == -1 as error code?
 }
 
 // Output Functions:==========================================================

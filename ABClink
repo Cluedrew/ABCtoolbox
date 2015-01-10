@@ -10,5 +10,5 @@ fi
 
 ### Alt:
 
-# Creates a link from a directory searched by the g++ -l flag (/user/bin ?)
+# Creates a link from a directory searched by the g++ -l flag (/usr/include ?)
 # to where the objects/headers for ABC Tool Box are.
