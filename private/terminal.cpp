@@ -100,7 +100,7 @@ void Terminal::ShowEcho (bool show)
     noecho();
 }
 
-/*/
+/*/ [Working on name.]
 void Terminal::UseKeypad (bool use)
 {
   if (use)
@@ -139,16 +139,41 @@ bool Terminal::MoveC (int const & x, int const & y)
   move(y, x);
   return true;
   // ERR == -1 as error code?
+  // return (ERR != move(y, x));
 }
 bool Terminal::MoveC (loc const & l)
 {
   move(l.y, l.x);
   return true;
   // ERR == -1 as error code?
+  // return (ERR != move(l.y, l.x));
 }
 
 // Output Functions:==========================================================
+// Print out a character with the given id.
+void Terminal::PutCh(int)
+{}
+
+// Print out a value in a human readable form.
+void Terminal::Print(char)
+{}
+
+void Terminal::Print(char const *)
+{}
+
+void Terminal::Print(std::string)
+{}
 
 // Input Functions:===========================================================
+// Read in the next character and return it.
+int Terminal::GetCh(void)
+{}
+
+// Read in a type from a human readable form.
+char Terminal::ReadChar ()
+{}
+
+std::string Terminal::ReadString ()
+{}
 
 }//abc

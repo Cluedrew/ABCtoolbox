@@ -96,31 +96,33 @@ public:
   
   
   int GetCh(void);
-  /*
+  /* Read in the next character and return it.
    * Prams.:
    * Effect:
    * Return:
    */
   
   void PutCh(int);
-  /*
+  /* Print out a character with the given id.
    * Prams.:
    * Effect:
    * Return:
    */
+  
+  
   
   void Print(char);
   void Print(char const *);
   void Print(std::string);
-  /*
+  /* Print out a value in a human readable form.
    * Prams.:
    * Effect:
    * Return:
    */
   
-  char         ReadChar ();
-  std::string  ReadString ();
-  /*
+  char ReadChar ();
+  std::string ReadString ();
+  /* Read in a type from a human readable form.
    * Prams.:
    * Effect:
    * Return:

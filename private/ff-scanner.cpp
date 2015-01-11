@@ -49,6 +49,25 @@ FFScanner & FFScanner::operator= (FFScanner const & other)
 
 
 // Implementation Functions: =================================================
+// Static: ===================================================================
+// Make sure that the given format is valid.
+bool CheckFormat (std::string const & format)
+{
+  // Start from the beginning of the format.
+  unsigned int position = 0;
+  
+  // Go through the entire format.
+  for (unsigned int len = format.size() ; position < len ; ++position)
+  {
+    // Control tokens:
+    if ('%' == format[position])
+    {}
+    // Regular characters:
+    else
+    {}
+  }
+}
+
 // Access: ===================================================================
 
 // File Operations: ==========================================================

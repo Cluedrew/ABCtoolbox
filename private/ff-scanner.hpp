@@ -37,8 +37,10 @@ public:
   
   virtual ~FFScanner();
   
-  // static bool CheckFormat(std::string const & format);
-  /* Make sure that ther
+  
+  
+  static bool CheckFormat (std::string const & format);
+  /* Make sure that the given format is valid.
    * Prams.: A string containing a file format.
    * Effect: void
    * Return: True if the format is valid, false otherwise.
@@ -46,21 +48,21 @@ public:
   
   
   
-  bool Open(std::string file);
+  bool Open (std::string file);
   /* 
    * Prams.:
    * Effect:
    * Return:
    */
   
-  void Close();
+  void Close ();
   /* 
    * Prams.:
    * Effect:
    * Return:
    */
   
-  bool Check(std::string file);
+  bool Check (std::string file);
   /* Check to see if the given file matches the format of this scanner.
    * Prams.:
    * Effect:
@@ -70,16 +72,34 @@ public:
   // Extraction Operator Overloads
   FFScanner & operator>> (char const &);
   FFScanner & operator>> (char const *);
-  FFScanner & operator>> (std::string);
+  FFScanner & operator>> (std::string&);
   /* These can be used to move forward in the format.
+   * Prams.: A character, character pointer or string.
+   * Effect: Moves forward through the scanner
+   * Return:
+   */
+  
+  //FFScanner & operator>> (char &);
+  //FFScanner & operator>> (char *); ?
+  //FFScanner & operator>> (std::string &);
+  //FFScanner & operator>> (int &); ...
+  //FFScanner & operator>> (float &); ...
+  //FFScanner & operator>> (... &); ...
+  
+  //bool operator bool ();
+  
+  //void Clear(); clear error flags.
+  /* 
    * Prams.:
    * Effect:
    * Return:
    */
   
-  //bool operator bool ();
-  
-  //void Clear(); clear error flags.
+  /* 
+   * Prams.:
+   * Effect:
+   * Return:
+   */
 };
 
 }
