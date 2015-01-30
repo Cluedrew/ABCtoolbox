@@ -4,17 +4,22 @@
 # Print the usage.
 function usage ()
 {
-  echo Usage: $0 ([directory]| -h)
+  echo "Usage: $0 ([directory]| -h)"
 }
 
 # Create a link from the directory in $1 to the include directory.
 function makelink ()
 {
-  # Get the directory of the ABCtoolbox, i.e. the one that contains this file.
+  # Save the location of the target directory.
+  TARGET=$1
   
+  # Get the directory of the ABCtoolbox, i.e. the one that contains this file.
+  HEREPATH="$(cd "$(dirname "$0" )" && pwd)"
   # Create a path to the include directory (containing .hpp and .o files).
+  INCLUDE=$HEREPATH/include
   
   # Create the link.
+  ln --symbolic -t $TARGET $INCLUDE
 }
 
 # Show the help information for the script
@@ -24,17 +29,19 @@ function showhelp ()
   echo 
 }
 
+echo "Still in beta"
+
 # Check for good input.
 if [ $# -gt 2 ]; then
   usage
   exit 1
 
 # No peramiter: Standard usage:
-elif [ "$1" -eq  ""  ]; then
+elif [ "$1" ==  ""  ]; then
   makelink /usr/bin/include_ # Check that before testing. !!!!! !!!!!
 
 # -h option: Help usage:
-elif [ "$1" -eq "-h" ]; then
+elif [ "$1" == "-h" ]; then
   showhelp
 
 # Check for a proper directory.
