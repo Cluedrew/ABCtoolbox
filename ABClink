@@ -10,8 +10,8 @@ function usage ()
 # Create a link from the directory in $1 to the include directory.
 function makelink ()
 {
-  # Save the location of the target directory.
-  TARGET=$1
+  # Calculate the position/name of the link.
+  LINKNAME=$(pwd)/$1/ABC
   
   # Get the directory of the ABCtoolbox, i.e. the one that contains this file.
   HEREPATH="$(cd "$(dirname "$0" )" && pwd)"
@@ -19,17 +19,29 @@ function makelink ()
   INCLUDE=$HEREPATH/include
   
   # Create the link.
-  ln --symbolic -t $TARGET $INCLUDE
+  if ln --symbolic -T $INCLUDE $LINKNAME; then
+    # Tell the user what just happened.
+    echo "Link to the ABC Tool Box made:" $LINKNAME
+  else
+    echo "Link not made"
+  fi
 }
 
 # Show the help information for the script
 function showhelp ()
 {
   usage
-  echo 
+  echo "
+ABClink is a tool in the ABC Tool Box that makes it easier to access the tool
+box for coding. It creates a link to a directory that contains all of the
+headers for include directives as well as object files that are linked into
+code that uses the tool box.
+
+...Rest will come when the link script is working."
 }
 
 echo "Still in beta"
+# The name doesn't simpliy quite right and I need to finish the help.
 
 # Check for good input.
 if [ $# -gt 2 ]; then
