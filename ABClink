@@ -11,19 +11,21 @@ function usage ()
 function makelink ()
 {
   # Calculate the position/name of the link.
-  LINKNAME=$(pwd)/$1/ABC
-  
+  LINKNAME=$1/ABC
+  #LINKNAME=$(pwd)/$1/ABC
+  # test for a starting / (absolute path) and trailing / (avoid repeats)
+
   # Get the directory of the ABCtoolbox, i.e. the one that contains this file.
   HEREPATH="$(cd "$(dirname "$0" )" && pwd)"
   # Create a path to the include directory (containing .hpp and .o files).
   INCLUDE=$HEREPATH/include
-  
+
   # Create the link.
   if ln --symbolic -T $INCLUDE $LINKNAME; then
     # Tell the user what just happened.
     echo "Link to the ABC Tool Box made:" $LINKNAME
   else
-    echo "Link not made"
+    echo "Error Occured: Link not made"
   fi
 }
 
@@ -50,7 +52,7 @@ if [ $# -gt 2 ]; then
 
 # No peramiter: Standard usage:
 elif [ "$1" ==  ""  ]; then
-  makelink /usr/bin/include_ # Check that before testing. !!!!! !!!!!
+  makelink /usr/local/bin # Check that before testing. !!!!! !!!!!
 
 # -h option: Help usage:
 elif [ "$1" == "-h" ]; then

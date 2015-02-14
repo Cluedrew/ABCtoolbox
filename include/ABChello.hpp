@@ -1,5 +1,5 @@
-#ifndef ABC_HELLO_H
-#define ABC_HELLO_H 1.0
+#ifndef ABC_HELLO_HPP
+#define ABC_HELLO_HPP 1.0
 
 /* Hello,
  * 
@@ -19,8 +19,9 @@ void HelloWorld (void);
  * Prams.: void
  * Effect: Prints a message to the standard output.
  * Return: void
+ * Timing: constaint
  * Except: no-throw
  */
 }
 
-#endif//ABC_HELLO_H
+#endif//ABC_HELLO_HPP
