@@ -3,7 +3,7 @@
 
 # The default link: Also the global link because all users can reach it.
 # Doesn't actually work like that right now.
-DEFAULTLINK=/usr/local/bin
+DEFAULTLINK="/usr/local/include"
 
 # Print the usage.
 function usage ()
