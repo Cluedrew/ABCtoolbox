@@ -4,5 +4,12 @@ It is not singular in purpose, instead dividing up sections of code I have
 created. They are supposed to be "library quality" and fully documented. This
 will not always be the case but I will continue to try.
 
-Also, it is still very deep in development (pre-alpha if you will). It is currantly
-unusable as I get the supporting structure and some of the inital tools finished.
+There are two other text files that might interest any passer-by. The first it
+DevManual.txt which has a lot of information on how the tool box is set up,
+subject to change as this is a learning exprance for me too. The second is
+UserManual.txt which is for anyone who wants to use the tool box, also subject
+to change.
+
+Also, it is still very deep in development (pre-alpha if you will). It is
+currantly unusable as I get the supporting structure and some of the inital
+tools finished.

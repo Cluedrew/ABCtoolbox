@@ -8,18 +8,12 @@ the ABCtoolbox are defined within the abc namespace and so must be accessed
 with abc::NAME or by a using declaration. All terms defined by ABCtoolbox
 during the pre-proccessor run begin with ABC_.
 
-ABCtoolbox:
-
-ABCmake:
-
-ABCglobal:
-
-ABCio:
-
-ABCerror:
-
-ABCterminal:
-
-ABCgraphical:
-
-ABCfile:
+Linking:
+ABClink will create a link from /usr/local/include to an internal file, the
+link is called ABC. So to access the header files use:
+  #include <ABC/[header]>
+in your files. To compile and link the files add
+  -L/usr/include/local/ABC
+to the linker's call and add the approprate
+  -lABC[tool]
+flags as well, one for each tool you are using.

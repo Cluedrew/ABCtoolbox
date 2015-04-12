@@ -8,8 +8,9 @@
  * tool box is getting
  */
 
-#include "../private/hello-world.hpp"
-//#include "~/ABCtoolbox/private/hello-world.hpp"
+#include "../code/hello.world.hpp"
+#include "../ABCdefine.hpp"
+#include ABCDEF_STR(ABCDEF_PATH(hello-world.hpp))
 
 
 

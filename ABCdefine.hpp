@@ -3,12 +3,12 @@
 
 // Preprocesser defines
 
+#define ABCDEF_STR(s) #s
 
-
-#define ABC_CODEPATH ../private
-// Defines a path from the include directory to the code directory.
-// I could make it a macro function to give each tool a directory.
-// ex #define ABC_CODEPATH(dir) ../private/ ## dir ## /
-// BAN: not more of this until I get the ABChello working.
+#define ABCDEF_PATH(d) ../code/ ## d
+/* Is meant to be with includes, two examples.
+ * #include "ABCDEF_PATH(.)/header.hpp"
+ * #include "ABCDEF_PATH(subdir)/header.hpp
+ */
 
 #endif//ABC_DEFINE_H
