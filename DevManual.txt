@@ -1,3 +1,4 @@
+
 Details of ABC Tool Box for development:
 
 Labels:=======================================================================
@@ -35,33 +36,38 @@ ABCtoolbox: Main directory, anything that doesn't go somewhere else goes here.
 |private: The "private members" of the tool box. In other words the
 || implementation of system.
 
+Tools:========================================================================
+A tool is a section of code that is exported. Each tool has a header files and
+a library in the include directory. Both have the same base name as the tool,
+but have preffixes and file types added as needed.
+
+See tool list.
+
 Public Headers:===============================================================
 
-ABCmake:
-
-ABCglobal:
-
-ABCio:
-
-ABCerror:
-
-ABCterminal:
-
-ABCgraphical:
-
-ABCfile:
-
-ABCffscanner: Provides a class that can be used to scan formated files for
-input.
+Public headers are the ones given to the user in the include directrory.
+Currantly there is one public header for each tool, which has the same name as
+the tool +.hpp. Although things are compiled outside of the include directory
+(to keep the mess down) public headers may only include via <> includes and
+other public headers. Only the compiled version of the code is moved to the
+include directory so other files may use "" includes.
 
 Internal Headers:=============================================================
 
-terminal.hpp:
+Internal headers are used to implement parts of the code that are not given
+to the user.
 
-structures.hpp:
+Compilation Flow:=============================================================
 
-ff-scanner-base.hpp:
+Sorce files (.cpp) are complied into an object file for the tool.
+ * Currantly this is all that happens. As all in one step with no variation,
+   but I'm working on that.
 
-ff-static-base.hpp:
+The public header is copied from the code directory to the include directory.
 
-output.hpp:
+A library file is generated from the final object file for each tool and
+placed in the include directory.
+
+Tool List:====================================================================
+
+hello-world: Prints out a simple hello world message for testing.
