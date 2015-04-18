@@ -27,11 +27,15 @@ ABCtoolbox: Main directory, anything that doesn't go somewhere else goes here.
 |
 |code: Contains all of the code files that the tools are complied from.
 ||
-||[tool]: Sometime code is further grouped, usually by the tool it is for.
+||<tool>: Sometime code is further grouped, usually by the tool it is for.
+|| *** I think I'm going to have use this every time or not at all.
 |
 |headers: ??? Raw copies of the header files.
 |
 |.tmp: Hidden directory, contains intermidate files used in compilation.
+||   Finished objects go here.
+||
+||<tool>:
 |
 |private: The "private members" of the tool box. In other words the
 || implementation of system.
@@ -62,6 +66,12 @@ Compilation Flow:=============================================================
 Sorce files (.cpp) are complied into an object file for the tool.
  * Currantly this is all that happens. As all in one step with no variation,
    but I'm working on that.
+***???
+The code files from code/<tool> (or just code?) are compiled and the results
+are stored in .obj/<tool> along with dependancy files. Then all the objects in
+.obj/<tool> are linked to .obj/<tool>.o. Finally that file is turned into a
+library.
+***???
 
 The public header is copied from the code directory to the include directory.
 
