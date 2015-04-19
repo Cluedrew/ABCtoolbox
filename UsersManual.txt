@@ -11,9 +11,12 @@ during the pre-proccessor run begin with ABC_.
 Linking:
 ABClink will create a link from /usr/local/include to an internal file, the
 link is called ABC. So to access the header files use:
-  #include <ABC/[header]>
+  #include <ABC/(tool).hpp>
 in your files. To compile and link the files add
   -L/usr/include/local/ABC
 to the linker's call and add the approprate
-  -lABC[tool]
+  -lABC(tool)
 flags as well, one for each tool you are using.
+
+For the life of me I cannot find where I'm supposed to put the library files
+themselves. Which is the reason for the use of the -L flag.
