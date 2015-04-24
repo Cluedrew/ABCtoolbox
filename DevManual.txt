@@ -19,26 +19,43 @@ ABC_DEF_GH_IJ_: ABC DEFinition, Global Header, Interface Juard.
 
 File Structure:===============================================================
 
-ABCtoolbox: Main directory, anything that doesn't go somewhere else goes here.
+|ABCtoolbox: Main directory, anything that doesn't go somewhere else goes here.
 |
-|include: The export directory, sort of a temperary measure while I work on it
-|| (and discover how to do it properly). Contains the header file for each
-|| tool as well as the library file.
-|
-|code: Contains all of the code files that the tools are complied from.
+||include: The export directory, sort of a temperary measure while I work on it
+||  (and discover how to do it properly). Contains the header file for each
+||  tool as well as the library file.
 ||
-||<tool>: Sometime code is further grouped, usually by the tool it is for.
-|| *** I think I'm going to have use this every time or not at all.
+||<tool>.hpp: Public header for each tool.
+||
+||lib<tool>.a: Static library for each tool.
 |
-|headers: ??? Raw copies of the header files.
+||code: Contains all the raw code and other similar files created by hand.
+||
+|||<tool>: Contains the headers and source files for the tool.
+|||
+|||<tool>(.hpp|.cpp): The base of each tool is a header and source file with
+|||  the same base name as the tool of itself.
+|||
+|||lib: A list of the -l flags used in linking.
+|||
+|||*.cpp: All other .cpp files in the directory will be linked to create the
+|||  tool, wheither they implement anything usesful or not.
+-
+--headers: ??? Raw copies of the header files.
 |
-|.tmp: Hidden directory, contains intermidate files used in compilation.
+||.tmp: Hidden directory, contains intermidate files used in compilation.
 ||   Finished objects go here.
 ||
-||<tool>:
-|
-|private: The "private members" of the tool box. In other words the
-|| implementation of system.
+|||<tool>: Directory for all intermediate object files and dependancy files.
+|||
+|||<tool>(.o|.d): Although it is treated the same there will always be an
+|||  object and dependancy file with the same base name as the tool. Other
+|||  files also exist.
+||
+||<tool>.o: Final linked object for each tool.
+-
+--private: The "private members" of the tool box. In other words the
+-- implementation of system.
 
 Tools:========================================================================
 A tool is a section of code that is exported. Each tool has a header files and
@@ -51,7 +68,7 @@ Public Headers:===============================================================
 
 Public headers are the ones given to the user in the include directrory.
 Currantly there is one public header for each tool, which has the same name as
-the tool +.hpp. Although things are compiled outside of the include directory
+the tool + .hpp. Although things are compiled outside of the include directory
 (to keep the mess down) public headers may only include via <> includes and
 other public headers. Only the compiled version of the code is moved to the
 include directory so other files may use "" includes.
