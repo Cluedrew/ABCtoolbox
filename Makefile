@@ -8,12 +8,18 @@ TOOLLIST= hello-world
 
 
 
+# Access Link Varibles:
+LINKDIR=/usr/local/include
+LINKNAME=ABC
+# The system is likely to be replaced eventually with a proper install.
+
+
+
 # Compiler Varaibles:
 CXX=gcc
 CXXFLAGS=-Wall -MMD -std=c++11
 
-# Is it possible to link in libraries ahead of time,
-# As well as join the partally made objects together?
+# Link Varibles:
 LINK=ld
 LINKFLAGS=-Ur
 
@@ -21,7 +27,7 @@ LINKFLAGS=-Ur
 # Code/Source Directory, holds raw files not created by make.
 SORDIR=code
 # Object/Intermediate Directory, files both generated and used by make
-#   which are mostly objects.
+#   which are mostly objects. Also a temperary file.
 OBJDIR=.obj
 # Library/Target Directory, holds the end results of make.
 LIBDIR=include
@@ -105,3 +111,9 @@ clean :
 deepclean : clean
 	-rm $(call endfiles,$(TOOLLIST))
 	-rmdir $(LIBDIR)
+
+# link : $(LINKDIR)/$(LINKNAME)
+# delink :
+#	rm link
+# $(LINKDIR)/$(LINKNAME) :
+#	link rule.

@@ -40,10 +40,8 @@ File Structure:===============================================================
 |||
 |||*.cpp: All other .cpp files in the directory will be linked to create the
 |||  tool, wheither they implement anything usesful or not.
--
---headers: ??? Raw copies of the header files.
 |
-||.tmp: Hidden directory, contains intermidate files used in compilation.
+||.obj: Hidden directory, contains intermidate files used in compilation.
 ||   Finished objects go here.
 ||
 |||<tool>: Directory for all intermediate object files and dependancy files.
@@ -53,9 +51,13 @@ File Structure:===============================================================
 |||  files also exist.
 ||
 ||<tool>.o: Final linked object for each tool.
--
---private: The "private members" of the tool box. In other words the
--- implementation of system.
+
+|/usr/local/include/ABC: This is an external link into the system. It is
+|  placed properly for header includes, it should also be added to the search
+|  path for libraries with -L.
+|  It is will be used until there is enough in the ABCtoolbox that someone
+|  might want to use and install it, at which point I will add a proper
+|  install method.
 
 Tools:========================================================================
 A tool is a section of code that is exported. Each tool has a header files and
@@ -80,21 +82,33 @@ to the user.
 
 Compilation Flow:=============================================================
 
-Sorce files (.cpp) are complied into an object file for the tool.
- * Currantly this is all that happens. As all in one step with no variation,
-   but I'm working on that.
-***???
-The code files from code/<tool> (or just code?) are compiled and the results
-are stored in .obj/<tool> along with dependancy files. Then all the objects in
-.obj/<tool> are linked to .obj/<tool>.o. Finally that file is turned into a
-library.
-***???
+Sorce files from code/<tool>/<file>.cpp are complied into an object file
+.obj/<tool>/<file>.o. These are then linked with any libraries listed in the
+lib file in the tool's directory code/<tool>/lib (if one exists) to create a
+final object .obj/<tool>.o. This is then used to create the library file for
+the tool, include/<tool>.a.
 
 The public header is copied from the code directory to the include directory.
-
-A library file is generated from the final object file for each tool and
-placed in the include directory.
+Hence the code/<tool>/<tool>.hpp file is copied to include/<tool>.hpp.
 
 Tool List:====================================================================
 
 hello-world: Prints out a simple hello world message for testing.
+
+TOBE:
+set: The STL set I find to be a little lacking, so I thought I might try and
+  fix it or add onto it.
+
+TOBE:
+terminal: A wrapper for ncurses that provides a set of elements (buttons,
+  menus, grids) that can be created in the consol.
+
+TOBE:
+tio: Basic input/output streams that work with terminal. Includes special
+  streams for fields (buttons, lists).
+
+TOBE:
+ffscanner: Read and write formated files. Not so sure about this one now.
+
+TOBE:
+base tools: used by other tools? Like structure collections.
