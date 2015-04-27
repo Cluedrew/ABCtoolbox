@@ -9,8 +9,9 @@ with abc::NAME or by a using declaration. All terms defined by ABCtoolbox
 during the pre-proccessor run begin with ABC_.
 
 Linking:
-ABClink will create a link from /usr/local/include to an internal file, the
-link is called ABC. So to access the header files use:
+Use 'make link' to create a link to attach /usr/local/include to the include
+directory. 'make delink' can be used to distroy the link. Super user
+permitions may be required. Then to access the header files use:
   #include <ABC/(tool).hpp>
 in your files. To compile and link the files add
   -L/usr/include/local/ABC

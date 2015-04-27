@@ -1,3 +1,8 @@
+# Target Directory
+include/
+
+
+
 # Compiled Object files
 *.slo
 *.lo
