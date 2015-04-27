@@ -10,8 +10,11 @@ TOOLLIST= hello-world
 
 # Access Link Varibles:
 LINKDIR=/usr/local/include
-LINKNAME=ABC
+LINKNAME=$(LINKDIR)/ABC
+LINKDEST=/home/cluedrew/ABCtoolbox/include # *
 # The system is likely to be replaced eventually with a proper install.
+# * This should be replaced that finds the location of this file, so it always
+#   gets the correct location of /include.
 
 
 
@@ -78,7 +81,6 @@ $(LIBDIR)/lib%.a : $(OBJDIR)/%.o | $(LIBDIR)
 	ar rcs $@ $<
 
 # Copy the public header over to the include directory.
-#$(call toolhead,$(TOOLLIST)) :
 $(LIBDIR)/%.hpp : $(SORDIR)/%/$$*.hpp | $(LIBDIR)
 	cp $< $@
 
@@ -89,6 +91,20 @@ $(FINOBJ) : $(OBJDIR)/%.o : $$($$*_OBJ) | $(OBJDIR)
 # Rule for intermediate objects (objects created from code)
 $(INTOBJ) : $(OBJDIR)/%.o : $(SORDIR)/%.cpp | $(OBJDIR)/$$(dir $$*)
 	$(CXX) $(CXXFLAGS) -c $< -o $@
+
+
+
+# Rules for link creation and destruction.
+# Might require special permitions.
+link : $(LINKNAME)
+
+delink :
+	rm $(LINKNAME)
+
+$(LINKNAME) :
+	ln --symbolic -T $(LINKDEST) $@
+
+
 
 # Directory creation.
 $(OBJDIR) $(LIBDIR) : ; mkdir $@
@@ -111,9 +127,3 @@ clean :
 deepclean : clean
 	-rm $(call endfiles,$(TOOLLIST))
 	-rmdir $(LIBDIR)
-
-# link : $(LINKDIR)/$(LINKNAME)
-# delink :
-#	rm link
-# $(LINKDIR)/$(LINKNAME) :
-#	link rule.
