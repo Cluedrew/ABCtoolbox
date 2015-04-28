@@ -1,12 +1,6 @@
 
 Details of ABC Tool Box for development:
 
-Labels:=======================================================================
-USER: Avalible to the end user.
-INNER: Finished, but only for internal use.
-TOBE: Planned, does not exist yet.
-WIP: Unfinished/unstable.
-
 Defines:======================================================================
 All code names (functions, classes, varaibles and so on) that are defined by
 the ABCtoolbox are defined within the abc namespace and so must be accessed
@@ -91,13 +85,21 @@ the tool, include/<tool>.a.
 The public header is copied from the code directory to the include directory.
 Hence the code/<tool>/<tool>.hpp file is copied to include/<tool>.hpp.
 
+Labels:=======================================================================
+USER: Avalible to the end user.
+INNER: Finished, but only for internal use.
+TOBE: Planned, does not exist yet.
+WIP: Unfinished/unstable.
+
 Tool List:====================================================================
 
 hello-world: Prints out a simple hello world message for testing.
 
-TOBE:
+WIP:
 set: The STL set I find to be a little lacking, so I thought I might try and
   fix it or add onto it.
+TOBE: Add some optiomiations (hints might do something) and maybe expand it
+  to work with all sets, not just simple types.
 
 TOBE:
 terminal: A wrapper for ncurses that provides a set of elements (buttons,
