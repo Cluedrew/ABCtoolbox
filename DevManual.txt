@@ -15,6 +15,12 @@ File Structure:===============================================================
 
 |ABCtoolbox: Main directory, anything that doesn't go somewhere else goes here.
 |
+|README: General information about the ABC tool box project.
+|
+|DevManual.txt: This file. Information for developing the ABC tool box.
+|
+|UsersManual.txt: Information about using the ABC tool box's tools.
+|
 ||include: The export directory, sort of a temperary measure while I work on it
 ||  (and discover how to do it properly). Contains the header file for each
 ||  tool as well as the library file.
@@ -42,9 +48,32 @@ File Structure:===============================================================
 |||
 |||<tool>(.o|.d): Although it is treated the same there will always be an
 |||  object and dependancy file with the same base name as the tool. Other
-|||  files also exist.
+|||  files may also exist.
 ||
 ||<tool>.o: Final linked object for each tool.
+
+?????????????????????????????????????????????????????????????????????????????
+||test: Possible directory for tests
+||
+||???.sh: I might need an actual script to handle testing, if the make file
+||  is too combersum of a tool.
+||
+|||<tool>: Directory containing all test peramiters (and results?) for a tool
+|||  including code an so on.
+|||
+||||<program>: Since there has to be other code to use the modal, each test or
+||||  set there of will be based around a program that uses part of the ABC
+||||  tool box.
+||||
+||||<test>: A file or series of files containing the spesifications for each
+||||  test for the tool using the program.
+||||
+||||<test>.res: Possibly, a file containing the results
+
+This would probably be a good idea, but I will need a good test harness.
+Either something built for the situation or something generitc like my old
+runtests script. Also some tools will require manual testing.
+?????????????????????????????????????????????????????????????????????????????
 
 |/usr/local/include/ABC: This is an external link into the system. It is
 |  placed properly for header includes, it should also be added to the search
