@@ -22,3 +22,14 @@ Beyond that the make file should be abile to figure out what tests need to be
 run (time stamps on the tests, programs and results file). Then again we might
 need some equivlant of the -MMD flag to write out all the dependances for what
 tests what.
+
+So a program will have a series of tests.
+.../<program>:
+<test>.tst: Main test file, select an automatic/manual test, the command line
+  call to start the program and the expected exit code.
+<test>.in: Input for autormatic tests.
+<test>.out: Expected output for the automatic test.
+<test>.pr: Prompt for manual bests (instructions on what to test).
+<test>.res: Results, both auto and manual, first line has the passed/fail
+  result and the rest is a diff of the .out and actual output for automatic
+  test and the testers nodes for manual tests.
