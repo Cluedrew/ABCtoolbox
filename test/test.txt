@@ -33,3 +33,8 @@ So a program will have a series of tests.
 <test>.res: Results, both auto and manual, first line has the passed/fail
   result and the rest is a diff of the .out and actual output for automatic
   test and the testers nodes for manual tests.
+
+  Actually with this layout I can run the harness off of straght bash. I was
+going to try and fold it into a single file for a while but that will not work
+anyways. So with the right redirects and grep statements it should all work.
+
