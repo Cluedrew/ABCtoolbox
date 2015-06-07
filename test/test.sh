@@ -56,7 +56,8 @@
 # ( ) Extras:
 #   ( ) Help option
 #   ( ) Something to help you right the test files
-#   ( ) Poll wheither the test is auto or manual
+#   ( ) Poll the test type
+#   ( ) Check to see if the test is up to data / passed
 
 ##############################################################################
 ############################### IMPLEMENTATION ###############################
@@ -64,20 +65,95 @@
 echo "Not yet implemented"
 exit 0
 
-# Set the present working directory.
-DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
-# Stole that line.
+# Varibles____________________________________________________________________
+# Or global varibles if you would like.
 
-# Creating all the file names.
+# Temperary file names.
+tempout=
+temperr=
+tempdiff=
+
+# Creating all the test file names.
 prefix=$1/$2
 tstfile=${prefix}.tst
 infile =${prefix}.in
 outfile=${prefix}.out
+errfile=${prefix}.err
 prfile =${prefix}.pr
 resfile=${prefix}.res
+
 # Creating the program's name.
 program=$1/$1
 
+# Functions___________________________________________________________________
+
+# Safe Exit if the program is shut down early.
+# $1: exit code
+# $2: error message (optional, nothing printed if left out)
+function safe_exit()
+{
+  # For all non-empty temp file names, delete the file.
+  for tempfile in ${tempout} ${temperr} ${tempdiff};
+    rm ${tempfile}
+  done
+
+  # Print last error message.
+  if [ 1 < $# ]; then
+    echo $2 1>&2
+  fi
+
+  exit $1
+}
+trap "safe_exit 3" SIGHUP SIGINT SIGTERM
+
+# File Check: see if a file exists and what permitions we have for it.
+function file_check()
+{
+  # File exists
+  # Read permition
+  # Write permition
+  # Execute permition
+}
+
+# Ask Question: Ask a yes or no question and return the result.
+function ask_question()
+{
+  # Although this could be made more generic all the times I'm going to use
+  # it for now are exactly the same. Looks for some variants of yes and no,
+  # it will try a few times if it doesn't work it will return no. Well 2.
+
+  # Exit Codes:
+  # 0: answer is one of (y,yes).
+  # 1: answer is one of (n,no,).
+  # 2: too many tries.
+
+  # Set the question string.
+  question=
+
+  # Ask the question, get the answer.
+  echo ${question} "(y/n): "
+  read
+  # Check the answer
+  until ;
+  {
+    # Try to get the answer again.
+    echo "(y/n): "
+    read
+  }
+
+  # If the answer is a yes than exit 0.
+  # Otherwise exit 1.
+}
+
+# Main Code___________________________________________________________________
+
+# Set Up
+
+# Set the present working directory.
+DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
+# Stole that line.
+
+# Analzye the test file.
 # Is it an "auto" or "manual" test?
 test=grep -E -e "Test Type:" -f ${tstfile}
 # What is the expected exit code?
@@ -85,18 +161,27 @@ code=grep -E -e "Exit Code:" -f ${tstfile}
 # Arguments to pass to the call. (Whole call?)
 call=grep -E -e "Call Args:" -f ${tstfile}
 
+# Main Body
+
 if [ ${test} = auto ]; then
   # Create a temp file
-  # Redirect the output to it
+  tempout=$(mktemp abc-test.XXXXX --tmpdir=/tmp)
+  #tempout=$(mktemp abc-test.XXXXX --tmpdir=/tmp)
 
+  # Run the program with redirects.
   # $(program) $(call) < $(infile) > $(tempout)
+
+  tempdiff=$(mktemp abc-test.XXXXX --tmpdir=/tmp)
   # diff $(tempout) $(outfile) > $(tempdiff)
+
+  # Save test results
 
 elif [ ${test} = manual ]; then
   # Prompt the user.
   # If postive, run the program.
   # Ask for pass/fail.
   # If fail, ask for feedback.
+
 else
   # Invalid test peramiter.
   echo "Test was not specified 'auto' or 'manual'."
