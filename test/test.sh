@@ -15,6 +15,8 @@
 # Exit Codes:
 # 0 - Success
 # 1 - File Read Error (Missing, Bad Permitions, Incorrect Formating)
+# 2 - ???
+# 3 - Interupted.
 # ? - ???
 
 # The *.tst file:
@@ -54,10 +56,13 @@
 #   ( ) Remove Temp files
 #   ( ) Report if falure was during testing.
 # ( ) Extras:
-#   ( ) Help option
-#   ( ) Something to help you right the test files
-#   ( ) Poll the test type
-#   ( ) Check to see if the test is up to data / passed
+#   ( ) Help option (-h)
+#   ( ) Something to help you write the test files
+#   ( ) Poll the test type (-p)
+#   ( ) Check to see if the test is up to data / passed (-q)
+#   ( ) List off all tests (-l)
+#   ( ) Get the string that is in passed result files (-s)
+#   ( ) Option to force running a test (-t)
 
 ##############################################################################
 ############################### IMPLEMENTATION ###############################
@@ -69,6 +74,7 @@ exit 0
 # Or global varibles if you would like.
 
 # Temperary file names.
+# Possibly replace with an assositive array (map).
 tempout=
 temperr=
 tempdiff=
@@ -85,15 +91,22 @@ resfile=${prefix}.res
 # Creating the program's name.
 program=$1/$1
 
+# If a .res file contains this followed by a newline, the test passed.
+pass_mark=_PASS_
+
+# Editor, when asked for feedback the program will use this editor.
+editor=nano
+
 # Functions___________________________________________________________________
+# Helper Functions are in this section.
 
 # Safe Exit if the program is shut down early.
 # $1: exit code
 # $2: error message (optional, nothing printed if left out)
-function safe_exit()
+function safe_exit ()
 {
   # For all non-empty temp file names, delete the file.
-  for tempfile in ${tempout} ${temperr} ${tempdiff};
+  for tempfile in ${tempout} ${temperr} ${tempdiff}; do
     rm ${tempfile}
   done
 
@@ -107,7 +120,7 @@ function safe_exit()
 trap "safe_exit 3" SIGHUP SIGINT SIGTERM
 
 # File Check: see if a file exists and what permitions we have for it.
-function file_check()
+function file_check ()
 {
   # File exists
   # Read permition
@@ -116,7 +129,7 @@ function file_check()
 }
 
 # Ask Question: Ask a yes or no question and return the result.
-function ask_question()
+function ask_question ()
 {
   # Although this could be made more generic all the times I'm going to use
   # it for now are exactly the same. Looks for some variants of yes and no,
@@ -127,22 +140,79 @@ function ask_question()
   # 1: answer is one of (n,no,).
   # 2: too many tries.
 
-  # Set the question string.
-  question=
+  local tries=0
 
   # Ask the question, get the answer.
-  echo ${question} "(y/n): "
+  echo ${1} " (y/n): "
   read
   # Check the answer
   until ;
   {
     # Try to get the answer again.
-    echo "(y/n): "
+    echo "Please enter yes (y) or no (n,): "
     read
   }
 
-  # If the answer is a yes than exit 0.
-  # Otherwise exit 1.
+  # If the answer is positive than exit 0.
+  # If the answer is negaive then exit 1.
+  # On a time out exit 2.
+}
+
+# Setting Get: Return part of a line from a file.
+# This function is to read in options from the .tst file, but it can
+# be used in other cases. Echos the result of the read.
+function setting_get ()
+{
+  local rresult=$(grep -E -e -f ${1} ${2})
+}
+
+# Functions___________________________________________________________________
+# For each major options from main.
+
+# Usage: run_test_auto PROGRAM TEST
+# Runs an auto test with in, out & err files.
+function run_test_auto ()
+{
+  # Create a temp file
+  tempout=$(mktemp abc-test.XXXXX --tmpdir=/tmp)
+  temperr=$(mktemp abc-test.XXXXX --tmpdir=/tmp)
+
+  # Run the program with redirects.
+  # $(program) $(call) < $(infile) > $(tempout) 2>
+
+  tempdiff=$(mktemp abc-test.XXXXX --tmpdir=/tmp)
+  diff -q -y $(tempout) $(outfile) > $(tempdiff)
+
+  # Save test results
+
+}
+
+# Usage: run_test_manual PRAGRAM TEST
+# Run an interactive manual test with a pr file.
+function run_test_manual ()
+{
+  echo "not yet implemented"
+  # Prompt the user.
+  $(< $prfile)
+
+  # If postive, run the program.
+  if ask_question "Would you like to run this test?"; then
+    # Run the test.
+    ${1}/${2}
+
+    # Ask for pass/fail.
+
+    # If pass, record the success.
+    if ask_question "Did the program pass the test?"; then
+      echo ${pass_mark} > ${resfile}
+    # If fail, ask for feedback.
+    else
+      # Overwright the old test results.
+      echo "Notes on failed test ${2} for ${1} .\n\n" > ${resfile}
+      # Get feed back.
+      ${editor} ${resfile}
+    fi
+  fi
 }
 
 # Main Code___________________________________________________________________
@@ -155,35 +225,29 @@ DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 
 # Analzye the test file.
 # Is it an "auto" or "manual" test?
-test=grep -E -e "Test Type:" -f ${tstfile}
+test=$(setting_get ${tstfile} "Test Type:")
 # What is the expected exit code?
-code=grep -E -e "Exit Code:" -f ${tstfile}
+code=$(setting_get ${tstfile} "Exit Code:")
 # Arguments to pass to the call. (Whole call?)
-call=grep -E -e "Call Args:" -f ${tstfile}
+call=$(setting_get ${tstfile} "Call Args:")
 
 # Main Body
 
 if [ ${test} = auto ]; then
-  # Create a temp file
-  tempout=$(mktemp abc-test.XXXXX --tmpdir=/tmp)
-  #tempout=$(mktemp abc-test.XXXXX --tmpdir=/tmp)
-
-  # Run the program with redirects.
-  # $(program) $(call) < $(infile) > $(tempout)
-
-  tempdiff=$(mktemp abc-test.XXXXX --tmpdir=/tmp)
-  # diff $(tempout) $(outfile) > $(tempdiff)
-
-  # Save test results
+  run_test_auto ${1} ${2}
 
 elif [ ${test} = manual ]; then
-  # Prompt the user.
-  # If postive, run the program.
-  # Ask for pass/fail.
-  # If fail, ask for feedback.
+  run_test_manual ${1} ${2}
 
 else
   # Invalid test peramiter.
   echo "Test was not specified 'auto' or 'manual'."
   exit 1
+
+# Getting the pass_mark
+#elif [[  ]]; then
+#  echo ${pass_mark}
+
 fi
+
+# Program completed.
