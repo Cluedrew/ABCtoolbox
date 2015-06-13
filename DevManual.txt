@@ -33,47 +33,44 @@ File Structure:===============================================================
 ||
 |||<tool>: Contains the headers and source files for the tool.
 |||
-|||<tool>(.hpp|.cpp): The base of each tool is a header and source file with
-|||  the same base name as the tool of itself.
+|||<tool>.hpp: The base of each tool is a header and source file with
+|||  the same base name as the tool of itself. Also the header file of the
+|||  same base name is the public header that is copied to include directory
+|||  and so may not use local includes.
 |||
 |||lib: A list of the -l flags used in linking.
 |||
-|||*.cpp: All other .cpp files in the directory will be linked to create the
-|||  tool, wheither they implement anything usesful or not.
+|||<file>.cpp: All other .cpp files in the directory will be linked to create
+|||  the tool, wheither they implement anything usesful or not.
 |
 ||.obj: Hidden directory, contains intermidate files used in compilation.
 ||   Finished objects go here.
 ||
 |||<tool>: Directory for all intermediate object files and dependancy files.
 |||
-|||<tool>(.o|.d): Although it is treated the same there will always be an
-|||  object and dependancy file with the same base name as the tool. Other
-|||  files may also exist.
+|||<file>.o|d: Pairs of object and dependancy files will exist in here for
+|||  every <file>.cpp file used to create the tool.
 ||
 ||<tool>.o: Final linked object for each tool.
-
-?????????????????????????????????????????????????????????????????????????????
-||test: Possible directory for tests
+|
+||test: Contains code and utilities for testing.
 ||
-||???.sh: I might need an actual script to handle testing, if the make file
-||  is too combersum of a tool.
+||test.sh: Script that automates most of the testing process. Also
 ||
-|||<tool>: Directory containing all test peramiters (and results?) for a tool
-|||  including code an so on.
+|||<program>: Since there has to be other code to use the modal, each test or
+|||  set there of will be based around a program that uses part of the ABC
+|||  tool box.
 |||
-||||<program>: Since there has to be other code to use the modal, each test or
-||||  set there of will be based around a program that uses part of the ABC
-||||  tool box.
-||||
-||||<test>: A file or series of files containing the spesifications for each
-||||  test for the tool using the program.
-||||
-||||<test>.res: Possibly, a file containing the results
-
-This would probably be a good idea, but I will need a good test harness.
-Either something built for the situation or something generitc like my old
-runtests script. Also some tools will require manual testing.
-?????????????????????????????????????????????????????????????????????????????
+|||<test>.tst: A file containing various instructions on how to run the test
+|||  for test.sh.
+|||
+|||<test>.(in|out|err): Input and output spefications used in fully automated
+|||  testing. Not always used.
+|||
+|||<test>.pr: The prompt or instructions for a manual test. Not always used.
+|||
+|||<test>.res: A file containing the results of the last test. If the test
+|||  passed it has a particular entry, otherwise it has information on why
 
 |/usr/local/include/ABC: This is an external link into the system. It is
 |  placed properly for header includes, it should also be added to the search
@@ -143,3 +140,6 @@ ffscanner: Read and write formated files. Not so sure about this one now.
 
 TOBE:
 base tools: used by other tools? Like structure collections.
+
+TOBE:
+trie: I found an algorithum for tries that I was trying to implement.

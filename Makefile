@@ -1,6 +1,5 @@
 # Make file for the ABC Tool Box:
-# Not currantly working, WIP
-
+# Working, but not fully tested.
 # See DevManual.txt for details.
 
 # The names of all of the tools.
@@ -34,11 +33,14 @@ SORDIR=code
 OBJDIR=.obj
 # Library/Target Directory, holds the end results of make.
 LIBDIR=include
+# Testing Directory, not part of main process, has the tests and the test
+#   programs which are used to test the compliled tools.
+TSTDIR=test
 
 
 
 # Special Rules:
-.PHONY : all clean $(TOOLLIST)
+.PHONY : all clean $(TOOLLIST) link delink
 .SECONDEXPANSION :
 
 # Misc Varibles:
