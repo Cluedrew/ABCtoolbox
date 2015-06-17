@@ -6,7 +6,8 @@
  * others (-).
  *
  * It should work, but I still have to test it. Then maybe I should optomize
- * the code somewhat (hints might help).
+ * the code somewhat (hints might help). Also, I'm working on making the
+ * functions generic for all instances of the template.
  */
 
 namespace abc

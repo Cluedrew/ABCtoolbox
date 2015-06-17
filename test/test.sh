@@ -120,12 +120,38 @@ function safe_exit ()
 trap "safe_exit 3" SIGHUP SIGINT SIGTERM
 
 # File Check: see if a file exists and what permitions we have for it.
+# Usage: file_check FILE FSTATE
+# Because this is not a script in its own right, it only covers the cases
+#   used in the script.
+# FSTATE: source, file exists and can be read from.
+#         dest,   file does not exist or can be written to.
 function file_check ()
 {
-  # File exists
-  # Read permition
-  # Write permition
-  # Execute permition
+  # source file check
+  if [ source == ${2} ]; then
+    if [ -r ${1} ]; then
+      return 0
+    elif [ -e ${1} ]; then
+      echo "No read permitions for ${1}"
+      return 1
+    else
+      echo "File ${1} does not exist"
+      return 1
+    fi
+
+  # dest file check
+  elif [ dest == ${2} ]; then
+    if [ -e ${1} -a ! -w ${1} ]; then
+      echo "Cannot write to ${1}"
+      return 1
+    else
+      return 0
+    fi
+  fi
+
+  # invalid option
+  echo "ERROR in file_check, invalid file state ${2} for ${1}"
+  return 2
 }
 
 # Ask Question: Ask a yes or no question and return the result.
@@ -141,6 +167,7 @@ function ask_question ()
   # 2: too many tries.
 
   local tries=0
+  local answer=ndef
 
   # Ask the question, get the answer.
   echo ${1} " (y/n): "
@@ -159,12 +186,17 @@ function ask_question ()
 }
 
 # Setting Get: Return part of a line from a file.
+# Usage: setting_get FILE LINEMARK
 # This function is to read in options from the .tst file, but it can
 # be used in other cases. Echos the result of the read.
 function setting_get ()
 {
   local rresult=$(grep -E -e -f ${1} ${2})
+  # Check for a single result.
+  # ...
 }
+
+
 
 # Functions___________________________________________________________________
 # For each major options from main.
@@ -230,6 +262,8 @@ test=$(setting_get ${tstfile} "Test Type:")
 code=$(setting_get ${tstfile} "Exit Code:")
 # Arguments to pass to the call. (Whole call?)
 call=$(setting_get ${tstfile} "Call Args:")
+
+
 
 # Main Body
 

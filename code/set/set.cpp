@@ -18,17 +18,20 @@ set<T> Union (set<T> const & lhs, set<T> const & rhs)
   std::set<T>::const_iterator lit = lhs.begin();
   std::set<T>::const_iterator rit = rhs.begin();
 
+  // Get the comparitor function.
+  std::set<T>::key_compare orderComp = fin.key_comp();
+
   // Sort through the two, gathering all elements.
   while (lit != lhs.end() && rit != rit.end())
   {
     // Next element comes from left, as left comes first.
-    if (*lit < *rit)
+    if (orderComp(*lit, *rit))
     {
       fin.insert(*lit);
       ++lit;
     }
     // Next element comes from right, as right comes first.
-    else if (*rit < *lit)
+    else if (orderComp(*rit, *lit))
     {
       fin.insert(*rit);
       ++rit;
@@ -68,14 +71,17 @@ set<T> set<T>::Intersect (set<T> const & lhs, set<T> const & rhs)
   std::set<T>::const_iterator lit = lhs.begin();
   std::set<T>::const_iterator rit = rhs.begin();
 
+  // Get the comparitor function.
+  std::set<T>::key_compare orderComp = fin.key_comp();
+
   // Iterate through the sets, looking for elements in both.
   while (lit != lhs.end() && rit != rit.end())
   {
     // Left element is 'before' right, therefore is not in both.
-    if (*lit < *rit)
+    if (orderComp(*lit, *rit))
       ++lit;
     // Similar for the next element in right.
-    else if (*rit < *lit)
+    else if (orderComp*rit, *lit))
       ++rit;
     // Next element appears in both.
     else
