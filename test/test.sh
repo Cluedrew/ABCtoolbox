@@ -9,6 +9,7 @@
 # *.tst : Test specification.
 # *.in  : Test input, auto tests only.
 # *.out : Expected output, auto tests only, empty if ommited.
+# *.err : Expected error output.
 # *.pr  : Prompt file, prompts user, manual tests only.
 # *.res : Results file, system generated.
 
@@ -18,6 +19,10 @@
 # 2 - ???
 # 3 - Interupted.
 # ? - ???
+
+# There are two main tags on error messages:
+# ERROR: this is an error message, usually from incorrect usage.
+# FAULT: The error shouldn't be able to come up, check the code.
 
 # The *.tst file:
 # This file must have three particular lines in it, all of which begin with
@@ -74,10 +79,9 @@ exit 0
 # Or global varibles if you would like.
 
 # Temperary file names.
-# Possibly replace with an assositive array (map).
-tempout=
-temperr=
-tempdiff=
+declare -A templist
+# # Possibly replace with an assositive array (map).
+# tempout=#temperr=#tempdiff= # Kept incase the array thing doesn't work.
 
 # Creating all the test file names.
 prefix=$1/$2
@@ -94,19 +98,41 @@ program=$1/$1
 # If a .res file contains this followed by a newline, the test passed.
 pass_mark=_PASS_
 
-# Editor, when asked for feedback the program will use this editor.
+# Editor, when asking for feedback the program will use this editor.
 editor=nano
 
 # Functions___________________________________________________________________
 # Helper Functions are in this section.
 
-# Safe Exit if the program is shut down early.
+# Temp Tog: A simple wrapper for making and distroying tmp files.
+# temp_tog (mk [FILE_INDEX])|(rm FILE_INDEX)
+function temp_tog ()
+{
+  # mk: Make a file
+  if [ "mk" == ${1} ]; then
+    local newtemp=$(mktemp --tmpdir=/tmp abc-test.XXXXX)
+
+    templist[${2}]=${newtemp}
+
+  # rm: Delete a file
+  elif [ "rm" == ${1} ]; then
+    # rm templist[${2}]
+    # unset templist[${2}]
+
+  else
+    echo "FAULT invalid argument in temp_tog: ${1}"
+    return 1
+  fi
+}
+
+# Safe Exit if the program is shut down early. This one is important.
 # $1: exit code
 # $2: error message (optional, nothing printed if left out)
 function safe_exit ()
 {
   # For all non-empty temp file names, delete the file.
-  for tempfile in ${tempout} ${temperr} ${tempdiff}; do
+  ##for tempfile in ${tempout} ${temperr} ${tempdiff}; do
+  for tempfile in ${!templist[@]}; do
     rm ${tempfile}
   done
 
