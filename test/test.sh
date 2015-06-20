@@ -43,6 +43,10 @@
 # <program>/<program> {Call Args}
 
 # Check List:
+# { } Not yet complete.
+# {?} Complete, but untested or buggy.
+# {-} Finished and tested.
+#
 # ( ) Auto Test Set Up
 #   ( ) Create Temp Files
 #   ( ) Call Function with various redirects
@@ -101,49 +105,40 @@ pass_mark=_PASS_
 # Editor, when asking for feedback the program will use this editor.
 editor=nano
 
-# Functions___________________________________________________________________
+# Functions_1_________________________________________________________________
 # Helper Functions are in this section.
 
-# Temp Tog: A simple wrapper for making and distroying tmp files.
-# temp_tog (mk [FILE_INDEX])|(rm FILE_INDEX)
-function temp_tog ()
+# Make a temp file and add it to templist at index.
+# mk_tfi FILE_INDEX
+# Exit Code: 0 - Success, file was created.
+#            1 - Index is already used.
+#            2 - File could not be created.
+function mk_tfi
 {
-  # mk: Make a file
-  if [ "mk" == ${1} ]; then
-    local newtemp=$(mktemp --tmpdir=/tmp abc-test.XXXXX)
-
-    templist[${2}]=${newtemp}
-
-  # rm: Delete a file
-  elif [ "rm" == ${1} ]; then
-    # rm templist[${2}]
-    # unset templist[${2}]
-
+  if [ -z ${templist[${1}]+def} ]; then
+    local newtemp=$(mktemp --tmpdir=/tmp abc-${1}.XXXXX)
+    if $?; then
+      templist[${1}]=${newtemp}
+    else
+      return 2
+    fi
   else
-    echo "FAULT invalid argument in temp_tog: ${1}"
     return 1
   fi
 }
 
-# Safe Exit if the program is shut down early. This one is important.
-# $1: exit code
-# $2: error message (optional, nothing printed if left out)
-function safe_exit ()
+# Delete the temp file at index and remove it from templist.
+# rm_tfi FILE_INDEX
+# Exit Code: 0 - Success, file no longer exists.
+function rm_tfi
 {
-  # For all non-empty temp file names, delete the file.
-  ##for tempfile in ${tempout} ${temperr} ${tempdiff}; do
-  for tempfile in ${!templist[@]}; do
-    rm ${tempfile}
-  done
-
-  # Print last error message.
-  if [ 1 < $# ]; then
-    echo $2 1>&2
+  if [ -n ${templist[${1}]+def} ]; then
+    # rm templist[${1}]
+    # unset templist[${1}]
+  else
+    return 0
   fi
-
-  exit $1
 }
-trap "safe_exit 3" SIGHUP SIGINT SIGTERM
 
 # File Check: see if a file exists and what permitions we have for it.
 # Usage: file_check FILE FSTATE
@@ -176,7 +171,7 @@ function file_check ()
   fi
 
   # invalid option
-  echo "ERROR in file_check, invalid file state ${2} for ${1}"
+  echo "FAULT in file_check, invalid file state ${2} for ${1}"
   return 2
 }
 
@@ -224,8 +219,30 @@ function setting_get ()
 
 
 
-# Functions___________________________________________________________________
+# Functions_2_________________________________________________________________
 # For each major options from main.
+
+# Safe Exit if the program is shut down early. This one is important.
+# $1: exit code
+# $2: error message (optional, nothing printed if left out)
+function safe_exit ()
+{
+  # For all non-empty temp file names, delete the file.
+  ##for tempfile in ${tempout} ${temperr} ${tempdiff}; do
+  for tempfile in ${!templist[@]}; do
+    rm ${tempfile}
+  done
+
+  # Print last error message.
+  if [ 1 < $# ]; then
+    echo $2 1>&2
+  fi
+
+  exit $1
+}
+trap "safe_exit 3" SIGHUP SIGINT SIGTERM
+
+
 
 # Usage: run_test_auto PROGRAM TEST
 # Runs an auto test with in, out & err files.
