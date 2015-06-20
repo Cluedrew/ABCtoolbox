@@ -4,6 +4,10 @@
 
 # Add usage, help, checks and so on.
 # echo $0 (program) (test)
+# Usage:
+#   $0 PROGRAM TEST
+#   $0 OPTION...
+#   $0 LONG_OPTION
 
 # Test files:
 # *.tst : Test specification.
@@ -18,7 +22,7 @@
 # 1 - File Read Error (Missing, Bad Permitions, Incorrect Formating)
 # 2 - ???
 # 3 - Interupted.
-# ? - ???
+# 4 - Fault occured, program aborted.
 
 # There are two main tags on error messages:
 # ERROR: this is an error message, usually from incorrect usage.
@@ -47,39 +51,49 @@
 # {?} Complete, but untested or buggy.
 # {-} Finished and tested.
 #
+# ( ) Get test peramiters
+#   ( ) get_setting helper function
 # ( ) Auto Test Set Up
 #   ( ) Create Temp Files
+#     (?) tempfileindex helper function
 #   ( ) Call Function with various redirects
 #   ( ) Preform Diff
 #   ( ) Save Results
 # ( ) Manual Test Set Up
 #   ( ) Prompt User and allow the test to skip
+#     (-) ask_question helper function.
 #   ( ) Call Program
 #   ( ) Get & Save Results
 # ( ) Argument Checking
 # ( ) File Checking
-#   ( ) Check for needed files
-#   ( ) Check for read permistions
+#   ( ) Check for source files
+#   ( ) Check for destination file
 #   ( ) Check for extra files?
 # ( ) Safe Exit
 #   ( ) Remove Temp files
-#   ( ) Report if falure was during testing.
+#   ( ) Report if failure was during testing.
 # ( ) Extras:
 #   ( ) Help option (-h)
 #   ( ) Something to help you write the test files
 #   ( ) Poll the test type (-p)
 #   ( ) Check to see if the test is up to data / passed (-q)
 #   ( ) List off all tests (-l)
-#   ( ) Get the string that is in passed result files (-s)
+#   ( ) Get the string that is in passed result files (--pass-mark)
 #   ( ) Option to force running a test (-t)
+#   ( ) Check (and maybe set) the editor used for results (-e)
+
+# Variables: Set up of the global variables.
+#            I'm not actually sure if they have to come first in bash.
+# Functions: All function declarations, there are two function sections.
+#         1: Contains helpers that preform some particular task.
+#         2: Contains outtakes from main for ogriniation (and safe_exit).
+# Main Code: The first code that is really run. Mainly for working through
+#            options from the command line.
 
 ##############################################################################
 ############################### IMPLEMENTATION ###############################
 
-echo "Not yet implemented"
-exit 0
-
-# Varibles____________________________________________________________________
+# Variables___________________________________________________________________
 # Or global varibles if you would like.
 
 # Temperary file names.
@@ -90,10 +104,10 @@ declare -A templist
 # Creating all the test file names.
 prefix=$1/$2
 tstfile=${prefix}.tst
-infile =${prefix}.in
+infile=${prefix}.in
 outfile=${prefix}.out
 errfile=${prefix}.err
-prfile =${prefix}.pr
+prfile=${prefix}.pr
 resfile=${prefix}.res
 
 # Creating the program's name.
@@ -108,44 +122,54 @@ editor=nano
 # Functions_1_________________________________________________________________
 # Helper Functions are in this section.
 
-# Make a temp file and add it to templist at index.
-# mk_tfi FILE_INDEX
-# Exit Code: 0 - Success, file was created.
-#            1 - Index is already used.
-#            2 - File could not be created.
-function mk_tfi
+# Make a temp file and add it to templist at INDEX.
+# tempfileindex COMMAND INDEX
+# COMMAND : mk - create a new temp file and store it in INDEX
+# Exit Codes:
+#  0 - Success, file was created/distoyed for INDEX
+#  1 - INDEX already is in the given state, as in it was empty for rm and
+#      full for make. It is now in the proper state but for the wrong reason.
+#  2 - Operation failed, INDEX is in the incorrect state.
+function tempfileindex
 {
-  if [ -z ${templist[${1}]+def} ]; then
-    local newtemp=$(mktemp --tmpdir=/tmp abc-${1}.XXXXX)
-    if $?; then
-      templist[${1}]=${newtemp}
-    else
-      return 2
-    fi
-  else
-    return 1
-  fi
-}
+  # I might through in a section to create a temp directory...
+  # Actually a single temp directory might work better than a lot
+  # of temp files. But then I need a way for the directory name as well.
 
-# Delete the temp file at index and remove it from templist.
-# rm_tfi FILE_INDEX
-# Exit Code: 0 - Success, file no longer exists.
-function rm_tfi
-{
-  if [ -n ${templist[${1}]+def} ]; then
-    # rm templist[${1}]
-    # unset templist[${1}]
+  # Make a new file at INDEX
+  if [ "mk" == ${1} ]; then
+    if [ -z ${templist[${2}]+def} ]; then
+      local newtemp=$(mktemp --tmpdir=/tmp abc-${2}.XXXXX)
+      if $?; then
+        templist[${2}]=${newtemp}
+      else
+        return 2
+      fi
+    else
+      return 1
+    fi
+
+  # remove the file at INDEX
+  elif [ "rm" == ${1} ]; then
+    if [ -n ${templist[${2}]+def} ]; then
+      rm templist[${2}] && unset templist[${2}] || return 2
+    else
+      return 1
+    fi
+
+  # Bad function call.
   else
-    return 0
+    echo "FAULT: invalid tempfileindex COMMAND ${1}"
+    exit 4
   fi
 }
 
 # File Check: see if a file exists and what permitions we have for it.
-# Usage: file_check FILE FSTATE
+# Usage: file_check FILE STATE
 # Because this is not a script in its own right, it only covers the cases
 #   used in the script.
-# FSTATE: source, file exists and can be read from.
-#         dest,   file does not exist or can be written to.
+# STATE: source, file exists and can be read from.
+#        dest,   file does not exist or can be written to.
 function file_check ()
 {
   # source file check
@@ -172,7 +196,7 @@ function file_check ()
 
   # invalid option
   echo "FAULT in file_check, invalid file state ${2} for ${1}"
-  return 2
+  exit 4
 }
 
 # Ask Question: Ask a yes or no question and return the result.
@@ -187,33 +211,39 @@ function ask_question ()
   # 1: answer is one of (n,no,).
   # 2: too many tries.
 
-  local tries=0
-  local answer=ndef
+  local tries=1
+  local ans=ndef
 
   # Ask the question, get the answer.
-  echo ${1} " (y/n): "
-  read
+  read -p "${1} (y/n): " ans
   # Check the answer
-  until ;
-  {
+  until [ ${tries} -ge 3 -o "${ans}" == "y" -o "${ans}" == "n" ]; do
     # Try to get the answer again.
-    echo "Please enter yes (y) or no (n,): "
-    read
-  }
+    read -p "Please enter yes (y) or no (n): " ans
+    tries=$(( ${tries} + 1 ))
+  done
 
-  # If the answer is positive than exit 0.
-  # If the answer is negaive then exit 1.
-  # On a time out exit 2.
+  # If the answer is positive than return 0.
+  if [ "${ans}" == "y" ]; then
+    return 0
+  # If the answer is negaive then return 1.
+  elif [ "${ans}" == "n" ]; then
+    return 1
+  # Otherwise, it must have been a time out.
+  else
+    return 2
+  fi
 }
 
-# Setting Get: Return part of a line from a file.
-# Usage: setting_get FILE LINEMARK
+# Get Setting: Return part of a line from a file.
+# Usage: get_setting FILE LINEMARK
 # This function is to read in options from the .tst file, but it can
 # be used in other cases. Echos the result of the read.
-function setting_get ()
+function get_setting ()
 {
   local rresult=$(grep -E -e -f ${1} ${2})
   # Check for a single result.
+  # wc -l ${rresult}
   # ...
 }
 
@@ -230,7 +260,7 @@ function safe_exit ()
   # For all non-empty temp file names, delete the file.
   ##for tempfile in ${tempout} ${temperr} ${tempdiff}; do
   for tempfile in ${!templist[@]}; do
-    rm ${tempfile}
+    tempfileindex rm ${tempfile}
   done
 
   # Print last error message.
@@ -253,7 +283,7 @@ function run_test_auto ()
   temperr=$(mktemp abc-test.XXXXX --tmpdir=/tmp)
 
   # Run the program with redirects.
-  # $(program) $(call) < $(infile) > $(tempout) 2>
+  # $1/$2 ${args} > ${templist[out]} 2> ${templist[err]}
 
   tempdiff=$(mktemp abc-test.XXXXX --tmpdir=/tmp)
   diff -q -y $(tempout) $(outfile) > $(tempdiff)
@@ -276,7 +306,6 @@ function run_test_manual ()
     ${1}/${2}
 
     # Ask for pass/fail.
-
     # If pass, record the success.
     if ask_question "Did the program pass the test?"; then
       echo ${pass_mark} > ${resfile}
@@ -291,6 +320,11 @@ function run_test_manual ()
 }
 
 # Main Code___________________________________________________________________
+
+echo "TESTING"
+ask_question "Hi how are you?"
+echo $?
+exit 0
 
 # Set Up
 
