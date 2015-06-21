@@ -24,9 +24,11 @@
 # 3 - Interupted.
 # 4 - Fault occured, program aborted.
 
-# There are two main tags on error messages:
+# There are three main tags on error messages:
 # ERROR: this is an error message, usually from incorrect usage.
 # FAULT: The error shouldn't be able to come up, check the code.
+# WARN: Non-critical error, a hicup noticable only because it might mean
+#       a more critical error occured elsewhere.
 
 # The *.tst file:
 # This file must have three particular lines in it, all of which begin with
@@ -98,8 +100,7 @@
 
 # Temperary file names.
 declare -A templist
-# # Possibly replace with an assositive array (map).
-# tempout=#temperr=#tempdiff= # Kept incase the array thing doesn't work.
+declare tempdir
 
 # Creating all the test file names.
 prefix=$1/$2
@@ -136,12 +137,17 @@ function tempfileindex
   # Actually a single temp directory might work better than a lot
   # of temp files. But then I need a way for the directory name as well.
 
+  # Bad function call: Wrong number of arguments.
+  if [ $# -ne 2 ]; then
+    echo "FAULT: invalid call tempfileindex needs two peramiters."
+    exit 4
+
   # Make a new file at INDEX
-  if [ "mk" == ${1} ]; then
-    if [ -z ${templist[${2}]+def} ]; then
-      local newtemp=$(mktemp --tmpdir=/tmp abc-${2}.XXXXX)
-      if $?; then
-        templist[${2}]=${newtemp}
+  elif [ "mk" == $1 ]; then
+    if [ -z ${templist[$2]+def} ]; then
+      local newtemp=$(mktemp --tmpdir=/tmp abc-$2.XXXXX)
+      if [ 0 == $? ]; then
+        templist[$2]=${newtemp}
       else
         return 2
       fi
@@ -150,14 +156,14 @@ function tempfileindex
     fi
 
   # remove the file at INDEX
-  elif [ "rm" == ${1} ]; then
-    if [ -n ${templist[${2}]+def} ]; then
-      rm templist[${2}] && unset templist[${2}] || return 2
-    else
+  elif [ "rm" == $1 ]; then
+    if [ -z ${templist[$2]+def} ]; then
       return 1
+    else
+      rm ${templist[$2]} && unset templist[$2] || return 2
     fi
 
-  # Bad function call.
+  # Bad function call: COMMAND not recongnized.
   else
     echo "FAULT: invalid tempfileindex COMMAND ${1}"
     exit 4
@@ -321,7 +327,15 @@ function run_test_manual ()
 # Main Code___________________________________________________________________
 
 echo "TESTING"
-ask_question "Hi how are you?"
+tempfileindex mk txt
+echo $?
+tempfileindex mk err
+echo $?
+tempfileindex mk err
+echo $?
+tempfileindex rm txt
+echo $?
+tempfileindex rm err
 echo $?
 exit 0
 
