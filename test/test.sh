@@ -279,13 +279,13 @@ trap "safe_exit 3" SIGHUP SIGINT SIGTERM
 function run_test_auto ()
 {
   # Create a temp file
-  tempout=$(mktemp abc-test.XXXXX --tmpdir=/tmp)
-  temperr=$(mktemp abc-test.XXXXX --tmpdir=/tmp)
+  tempfileindex mk out
+  tempfileindex mk err
 
   # Run the program with redirects.
   # $1/$2 ${args} > ${templist[out]} 2> ${templist[err]}
 
-  tempdiff=$(mktemp abc-test.XXXXX --tmpdir=/tmp)
+  tempfileindex mk diff
   diff -q -y $(tempout) $(outfile) > $(tempdiff)
 
   # Save test results
@@ -296,14 +296,13 @@ function run_test_auto ()
 # Run an interactive manual test with a pr file.
 function run_test_manual ()
 {
-  echo "not yet implemented"
   # Prompt the user.
   $(< $prfile)
 
   # If postive, run the program.
   if ask_question "Would you like to run this test?"; then
     # Run the test.
-    ${1}/${2}
+    $1/$2
 
     # Ask for pass/fail.
     # If pass, record the success.
