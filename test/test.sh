@@ -52,12 +52,20 @@
 # { } Not yet complete.
 # {?} Complete, but untested or buggy.
 # {-} Finished and tested.
+# Note that I only test for proper use, the system is not very robust.
+#   This is especially true for the internals.
 #
-# ( ) Get test peramiters
-#   ( ) get_setting helper function
+# ( ) General Set Up
+#   ( ) Argument Checking
+#   ( ) File Checking
+#     ( ) Check for source files
+#     ( ) Check for destination file
+#     ( ) Check for extra files?
+#   ( ) Read in test paramiters
+#     ( ) get_setting helper function
 # ( ) Auto Test Set Up
 #   ( ) Create Temp Files
-#     (?) tempfileindex helper function
+#     (-) tempfileindex helper function
 #   ( ) Call Function with various redirects
 #   ( ) Preform Diff
 #   ( ) Save Results
@@ -66,14 +74,10 @@
 #     (-) ask_question helper function.
 #   ( ) Call Program
 #   ( ) Get & Save Results
-# ( ) Argument Checking
-# ( ) File Checking
-#   ( ) Check for source files
-#   ( ) Check for destination file
-#   ( ) Check for extra files?
-# ( ) Safe Exit
-#   ( ) Remove Temp files
-#   ( ) Report if failure was during testing.
+#     ( ) Open the editor
+# (?) Safe Exit
+#   (-) Remove Temp files
+#   (?) Report if failure was during testing.
 # ( ) Extras:
 #   ( ) Help option (-h)
 #   ( ) Something to help you write the test files
@@ -253,30 +257,40 @@ function get_setting ()
   # ...
 }
 
+# Poll Test Status: Check the results of a test.
+# Usage: poll_test_status PROGRAM TEST
+# There are a lot of things this function could check. The most basic are
+#   wheither or not a test is uptodate and wheither or not it passed or failed
+#   the last time it was run.
+function poll_test_status ()
+{
+  return 0
+}
+
 
 
 # Functions_2_________________________________________________________________
 # For each major options from main.
 
 # Safe Exit if the program is shut down early. This one is important.
-# $1: exit code
-# $2: error message (optional, nothing printed if left out)
+# Usage: safe_exit [EXIT_CODE [ERROR_MSG]]
+# The script will clean up, exit with EXIT_CODE (0 if ommited) and optionally
+#   print ERROR_MSG before it exits.
 function safe_exit ()
 {
-  # For all non-empty temp file names, delete the file.
-  ##for tempfile in ${tempout} ${temperr} ${tempdiff}; do
+  # Delete all temp files that still exist.
   for tempfile in ${!templist[@]}; do
     tempfileindex rm ${tempfile}
   done
 
   # Print last error message.
-  if [ 1 < $# ]; then
+  if [ 2 -eq $# ]; then
     echo $2 1>&2
   fi
 
   exit $1
 }
-trap "safe_exit 3" SIGHUP SIGINT SIGTERM
+trap "safe_exit 3 'ERROR: forced quit from test'" SIGHUP SIGINT SIGTERM
 
 
 
@@ -327,16 +341,14 @@ function run_test_manual ()
 # Main Code___________________________________________________________________
 
 echo "TESTING"
+sleep 60
 tempfileindex mk txt
 echo $?
 tempfileindex mk err
 echo $?
-tempfileindex mk err
-echo $?
-tempfileindex rm txt
-echo $?
 tempfileindex rm err
 echo $?
+safe_exit
 exit 0
 
 # Set Up
