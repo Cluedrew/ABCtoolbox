@@ -62,7 +62,8 @@
 #     ( ) Check for destination file
 #     ( ) Check for extra files?
 #   ( ) Read in test paramiters
-#     ( ) get_setting helper function
+#     (?) get_setting helper function
+#     ( ) get_flag helper function
 # ( ) Auto Test Set Up
 #   ( ) Create Temp Files
 #     (-) tempfileindex helper function
@@ -228,8 +229,8 @@ function ask_question ()
   # it will try a few times if it doesn't work it will return no. Well 2.
 
   # Exit Codes:
-  # 0: answer is one of (y,yes).
-  # 1: answer is one of (n,no,).
+  # 0: answer is y.
+  # 1: answer is n.
   # 2: too many tries.
 
   local tries=1
@@ -260,23 +261,34 @@ function ask_question ()
 # Usage: get_setting FILE LINEMARK
 # This function is to read in options from the .tst file, but it can
 #   be used in other cases. Echos the result of the read.
-# Add something to specify if the setting is a flag, that is we just want to
-#   know if it exists or not.
 function get_setting ()
 {
-  local rresult=$(grep -E "$2" $1)
   # Check for a single result.
-  local lines=$(grep -E -c "$2" $1)
-  echo $rresult
-  echo $lines
-  return 0
-  if [ "$lines" == 1 ]; then
-    echo ${rresult}
+  local lines=$(grep -E -c "^$2" $1)
+
+  if [ "$lines" -eq 1 ]; then
+    local tempresult=$(grep -E "^$2" $1)
+    echo ${tempresult#$2}
     return 0
-  elif [ "$lines" == 0 ]; then
+  elif [ "$lines" -eq 0 ]; then
     return 1
   else
     return $lines
+  fi
+}
+
+# Get Flag:
+# Usage: get_flag FILE FLAG
+# Check the for flags in a file. Flags must take up an entire word. Returns 0
+#  if the flag is found, 1 otherwise and echos the number of flags found.
+function get_flag ()
+{
+  local flags=$(grep -E -c -w "$2" $1)
+  echo $flags
+  if [ "$flags" -gt 0 ]; then
+    return 0
+  else
+    return 1
   fi
 }
 
@@ -284,7 +296,8 @@ function get_setting ()
 # Usage: poll_test_status PROGRAM TEST
 # There are a lot of things this function could check. The most basic are
 #   wheither or not a test is uptodate and wheither or not it passed or failed
-#   the last time it was run.
+#   the last time it was run. Checking to see if the test exists or not could
+#   also be used.
 function poll_test_status ()
 {
   return 0
@@ -368,6 +381,7 @@ function run_test_manual ()
 echo "TESTING"
 
 get_setting ${tstfile} "Test Type:"
+echo $?
 
 safe_exit 0
 # -------------
