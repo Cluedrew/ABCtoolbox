@@ -77,7 +77,8 @@
 #     ( ) Open the editor
 # (?) Safe Exit
 #   (-) Remove Temp files
-#   (?) Report if failure was during testing.
+#   (-) Report if failure was during testing.
+#   (?) Clean interupt of tests.
 # ( ) Extras:
 #   ( ) Help option (-h)
 #   ( ) Something to help you write the test files
@@ -96,18 +97,28 @@
 # Main Code: The first code that is really run. Mainly for working through
 #            options from the command line.
 
+# BUGS________________________________________________________________________
+# safe_exit interupt doesn't kick in right away. I think that may be because
+# the things that are going on don't accept the signal and so the script waits
+# for them to be complete.
+
 ##############################################################################
 ############################### IMPLEMENTATION ###############################
 
 # Variables___________________________________________________________________
 # Or global varibles if you would like.
 
+# Get the directory this script is in.
+# Should always be one about the test program directorys.
+DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
+# Stole that line.
+
 # Temperary file names.
 declare -A templist
 declare tempdir
 
 # Creating all the test file names.
-prefix=$1/$2
+prefix=$DIR/$1/$2
 tstfile=${prefix}.tst
 infile=${prefix}.in
 outfile=${prefix}.out
@@ -187,17 +198,17 @@ function file_check ()
     if [ -r ${1} ]; then
       return 0
     elif [ -e ${1} ]; then
-      echo "No read permitions for ${1}"
+      echo "ERROR: No read permitions for ${1}"
       return 1
     else
-      echo "File ${1} does not exist"
+      echo "ERROR: File ${1} does not exist"
       return 1
     fi
 
   # dest file check
   elif [ dest == ${2} ]; then
     if [ -e ${1} -a ! -w ${1} ]; then
-      echo "Cannot write to ${1}"
+      echo "ERROR: Cannot write to ${1}"
       return 1
     else
       return 0
@@ -248,13 +259,25 @@ function ask_question ()
 # Get Setting: Return part of a line from a file.
 # Usage: get_setting FILE LINEMARK
 # This function is to read in options from the .tst file, but it can
-# be used in other cases. Echos the result of the read.
+#   be used in other cases. Echos the result of the read.
+# Add something to specify if the setting is a flag, that is we just want to
+#   know if it exists or not.
 function get_setting ()
 {
-  local rresult=$(grep -E -e -f ${1} ${2})
+  local rresult=$(grep -E "$2" $1)
   # Check for a single result.
-  # wc -l ${rresult}
-  # ...
+  local lines=$(grep -E -c "$2" $1)
+  echo $rresult
+  echo $lines
+  return 0
+  if [ "$lines" == 1 ]; then
+    echo ${rresult}
+    return 0
+  elif [ "$lines" == 0 ]; then
+    return 1
+  else
+    return $lines
+  fi
 }
 
 # Poll Test Status: Check the results of a test.
@@ -290,7 +313,7 @@ function safe_exit ()
 
   exit $1
 }
-trap "safe_exit 3 'ERROR: forced quit from test'" SIGHUP SIGINT SIGTERM
+trap "safe_exit 3 'ERROR: forced quit from testing'" SIGHUP SIGINT SIGTERM
 
 
 
@@ -340,30 +363,22 @@ function run_test_manual ()
 
 # Main Code___________________________________________________________________
 
-echo "TESTING"
-sleep 60
-tempfileindex mk txt
-echo $?
-tempfileindex mk err
-echo $?
-tempfileindex rm err
-echo $?
-safe_exit
-exit 0
-
 # Set Up
+# -------------
+echo "TESTING"
 
-# Set the present working directory.
-DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
-# Stole that line.
+get_setting ${tstfile} "Test Type:"
+
+safe_exit 0
+# -------------
 
 # Analzye the test file.
 # Is it an "auto" or "manual" test?
-test=$(setting_get ${tstfile} "Test Type:")
+test=$(get_setting ${tstfile} "Test Type:")
 # What is the expected exit code?
-code=$(setting_get ${tstfile} "Exit Code:")
+code=$(get_setting ${tstfile} "Exit Code:")
 # Arguments to pass to the call. (Whole call?)
-call=$(setting_get ${tstfile} "Call Args:")
+call=$(get_setting ${tstfile} "Call Args:")
 
 
 
