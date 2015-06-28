@@ -48,7 +48,7 @@
 # "Call Args:" Add to the command line argument that calls the program.
 # <program>/<program> {Call Args}
 
-# Check List:
+# Check List__________________________________________________________________
 # { } Not yet complete.
 # {?} Complete, but untested or buggy.
 # {-} Finished and tested.
@@ -89,7 +89,9 @@
 #   ( ) Get the string that is in passed result files (--pass-mark)
 #   ( ) Option to force running a test (-t)
 #   ( ) Check (and maybe set) the editor used for results (--editor)
+#   ( ) Run some subset of tests (--run-all)
 
+# Table of Implementation_____________________________________________________
 # Variables: Set up of the global variables.
 #            I'm not actually sure if they have to come first in bash.
 # Functions: All function declarations, there are two function sections.
@@ -121,9 +123,8 @@ TEST=
 
 # Temperary file names.
 declare -A templist
-# Temperary directory name (unused?).
-declare tempdir
 
+# !!! These may all have to be updated depending on the usage. !!!
 # Creating all the test file names.
 prefix=$DIR/$1/$2
 tstfile=${prefix}.tst
@@ -134,13 +135,13 @@ prfile=${prefix}.pr
 resfile=${prefix}.res
 
 # Possible storage for test files.
-declare -A filelist
+declare -A flst
 for type in tst in out err pr res; do
-  filelist[$type]=$prefix.$type
+  flst[$type]=$prefix.$type
 done
 
 # Creating the program's name.
-program=$1/$1
+program=$DIR/$1/$1
 
 # If a .res file contains this followed by a newline, the test passed.
 pass_mark=_PASS_
@@ -309,9 +310,39 @@ function get_flag ()
 # There are a lot of things this function could check. The most basic are
 #   wheither or not a test is uptodate and wheither or not it passed or failed
 #   the last time it was run. Checking to see if the test exists or not could
-#   also be used.
+#   also be used. Also the type of test.
 function poll_test_status ()
 {
+  # All appearing letters: ... I need to thing about this system.
+  # Dd? Rr MAx Pf Uo
+
+  # Check to see if the test is defined
+  # (Maybe print out error messages for this one?)
+  local defined=
+  #file_check source $DIR/$1/$2
+  if [ -d $DIR/$1 -a -r $DIR/$1/$2 ]; then
+    defined=D
+  else
+    defined=d
+  fi
+
+  # Is the test ready to run?
+  local ready=
+  if [ -e $DIR/$1/$1 ]; then
+    ready=R
+  else
+    ready=r
+  fi
+
+  # What is the test type?
+  local tsttype=$(get_setting $DIR/$1/$2 "Test Type:")
+  if [ auto == "$tsttype" ]; then
+    tsttype=A
+  elif [ manual == "$tsttype" ]; then
+    tsttype=M
+  else
+    tsttype=x
+  fi
   return 0
 }
 
@@ -390,9 +421,9 @@ function run_test_manual ()
 
 # Set Up
 # -------------
-echo "TESTING"
+#echo "TESTING"
 
-safe_exit 0
+#safe_exit 0
 # -------------
 
 
