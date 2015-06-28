@@ -62,8 +62,8 @@
 #     ( ) Check for destination file
 #     ( ) Check for extra files?
 #   ( ) Read in test paramiters
-#     (?) get_setting helper function
-#     ( ) get_flag helper function
+#     (-) get_setting helper function
+#     (-) get_flag helper function
 # ( ) Auto Test Set Up
 #   ( ) Create Temp Files
 #     (-) tempfileindex helper function
@@ -88,7 +88,7 @@
 #   ( ) List off all tests (-l)
 #   ( ) Get the string that is in passed result files (--pass-mark)
 #   ( ) Option to force running a test (-t)
-#   ( ) Check (and maybe set) the editor used for results (-e)
+#   ( ) Check (and maybe set) the editor used for results (--editor)
 
 # Variables: Set up of the global variables.
 #            I'm not actually sure if they have to come first in bash.
@@ -110,12 +110,18 @@
 # Or global varibles if you would like.
 
 # Get the directory this script is in.
-# Should always be one about the test program directorys.
+# Should always be one above the test program directorys.
 DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 # Stole that line.
 
+# Names of the test and the program that runs it.
+PROG=
+TEST=
+# Not sure about all caps, are these close enough to system vars?
+
 # Temperary file names.
 declare -A templist
+# Temperary directory name (unused?).
 declare tempdir
 
 # Creating all the test file names.
@@ -126,6 +132,12 @@ outfile=${prefix}.out
 errfile=${prefix}.err
 prfile=${prefix}.pr
 resfile=${prefix}.res
+
+# Possible storage for test files.
+declare -A filelist
+for type in tst in out err pr res; do
+  filelist[$type]=$prefix.$type
+done
 
 # Creating the program's name.
 program=$1/$1
@@ -142,6 +154,7 @@ editor=nano
 # Make a temp file and add it to templist at INDEX.
 # tempfileindex COMMAND INDEX
 # COMMAND : mk - create a new temp file and store it in INDEX
+#           rm - delete a temp file and clear it from INDEX
 # Exit Codes:
 #  0 - Success, file was created/distoyed for INDEX
 #  1 - INDEX already is in the given state, as in it was empty for rm and
@@ -222,22 +235,21 @@ function file_check ()
 }
 
 # Ask Question: Ask a yes or no question and return the result.
+# Usage: ask_question PROMPT...
+# Asks a question using the text in PROMPT followed by " (y/n): " before
+#   asking for the answer. If then answer is not reconized another question
+#   is echoed with prompt replaced by text explaining the input.
+# Exit Codes:
+# 0: Answer is y.
+# 1: Answer is n.
+# 2: Too many tries.
 function ask_question ()
 {
-  # Although this could be made more generic all the times I'm going to use
-  # it for now are exactly the same. Looks for some variants of yes and no,
-  # it will try a few times if it doesn't work it will return no. Well 2.
-
-  # Exit Codes:
-  # 0: answer is y.
-  # 1: answer is n.
-  # 2: too many tries.
-
   local tries=1
   local ans=ndef
 
   # Ask the question, get the answer.
-  read -p "${1} (y/n): " ans
+  read -p "$* (y/n): " ans
   # Check the answer
   until [ ${tries} -ge 3 -o "${ans}" == "y" -o "${ans}" == "n" ]; do
     # Try to get the answer again.
@@ -264,7 +276,7 @@ function ask_question ()
 function get_setting ()
 {
   # Check for a single result.
-  local lines=$(grep -E -c "^$2" $1)
+  local lines=$(grep -Ec "^$2" $1)
 
   if [ "$lines" -eq 1 ]; then
     local tempresult=$(grep -E "^$2" $1)
@@ -283,7 +295,7 @@ function get_setting ()
 #  if the flag is found, 1 otherwise and echos the number of flags found.
 function get_flag ()
 {
-  local flags=$(grep -E -c -w "$2" $1)
+  local flags=$(grep -Ecw "$2" $1)
   echo $flags
   if [ "$flags" -gt 0 ]; then
     return 0
@@ -380,38 +392,49 @@ function run_test_manual ()
 # -------------
 echo "TESTING"
 
-get_setting ${tstfile} "Test Type:"
-echo $?
-
 safe_exit 0
 # -------------
 
-# Analzye the test file.
-# Is it an "auto" or "manual" test?
-test=$(get_setting ${tstfile} "Test Type:")
-# What is the expected exit code?
-code=$(get_setting ${tstfile} "Exit Code:")
-# Arguments to pass to the call. (Whole call?)
-call=$(get_setting ${tstfile} "Call Args:")
 
 
 
 # Main Body
-
-if [ ${test} = auto ]; then
-  run_test_auto ${1} ${2}
-
-elif [ ${test} = manual ]; then
-  run_test_manual ${1} ${2}
-
-else
-  # Invalid test peramiter.
-  echo "Test was not specified 'auto' or 'manual'."
-  exit 1
+if [ 0 == $# ]; then
+  echo "Usage: ..."
 
 # Getting the pass_mark
-#elif [[  ]]; then
-#  echo ${pass_mark}
+elif [[ --pass-mark == "$1" ]]; then
+  echo ${pass_mark}
+
+# Getting the editor
+elif [[ --editor == "$1" ]]; then
+  echo ${editor}
+
+# Run a single test.
+elif [ 2 == $# ]; then
+  # Analzye the test file.
+  # Is it an "auto" or "manual" test?
+  test=$(get_setting ${tstfile} "Test Type:")
+  # What is the expected exit code?
+  code=$(get_setting ${tstfile} "Exit Code:")
+  # Arguments to pass to the call. (Whole call?)
+  call=$(get_setting ${tstfile} "Call Args:")
+
+  if [ ${test} = auto ]; then
+    run_test_auto ${1} ${2}
+
+  elif [ ${test} = manual ]; then
+    run_test_manual ${1} ${2}
+
+  else
+    # Invalid test peramiter.
+    echo "Test was not specified 'auto' or 'manual'."
+    exit 1
+  fi
+
+# Does not match any usage.
+else
+  echo "Usage: ..."
 
 fi
 
