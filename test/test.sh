@@ -384,11 +384,22 @@ function run_test_auto ()
   # Run the program with redirects.
   # $1/$2 ${args} > ${templist[out]} 2> ${templist[err]}
 
+  # Run a comparison between the expected and actual output.
   tempfileindex mk diff
-  diff -q -y $(tempout) $(outfile) > $(tempdiff)
+  diff -q -y ${templist[out]} ${outfile} > ${templist[diff]}
 
   # Save test results
+  # Check for the results of the comparison.
+  # A difference was detected.
+  if [ $? -eq 1 ]; then
+    echo "Test failed: diffrence detected in output:" > $resfile
+    cat ${templist[diff]} >> $resfile
+    return 1
 
+  # No difference between the files was found.
+  else
+    echo $pass_mark > $resfile
+  fi
 }
 
 # Usage: run_test_manual PRAGRAM TEST
