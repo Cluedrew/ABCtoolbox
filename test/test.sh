@@ -152,6 +152,8 @@ editor=nano
 # Functions_1_________________________________________________________________
 # Helper Functions are in this section.
 
+# Idea: make it accept multiple indexes so to group together calls.        !!!
+
 # Make a temp file and add it to templist at INDEX.
 # tempfileindex COMMAND INDEX
 # COMMAND : mk - create a new temp file and store it in INDEX
@@ -382,7 +384,11 @@ function run_test_auto ()
   tempfileindex mk err
 
   # Run the program with redirects.
-  # $1/$2 ${args} > ${templist[out]} 2> ${templist[err]}
+  # stdout and stderr to different files.
+  #$1/$2 ${args} > ${templist[out]} 2> ${templist[err]}
+
+  # stdout and stderr to the same file.
+  $1/$2 $args > ${templist[out]}
 
   # Run a comparison between the expected and actual output.
   tempfileindex mk diff
@@ -400,6 +406,8 @@ function run_test_auto ()
   else
     echo $pass_mark > $resfile
   fi
+
+  return 0
 }
 
 # Usage: run_test_manual PRAGRAM TEST
@@ -471,7 +479,7 @@ elif [ 2 == $# ]; then
   else
     # Invalid test peramiter.
     echo "Test was not specified 'auto' or 'manual'."
-    exit 1
+    safe_exit 1
   fi
 
 # Does not match any usage.
@@ -481,3 +489,4 @@ else
 fi
 
 # Program completed.
+safe_exit 0
