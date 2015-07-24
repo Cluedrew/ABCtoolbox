@@ -13,6 +13,7 @@ void HelloWorld (void);
  * Effect: Prints a message to the standard output.
  * Return: void
  * Except: no-throw
+ * Timing: O(1)
  */
 }
 

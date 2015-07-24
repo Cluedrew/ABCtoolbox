@@ -9,6 +9,20 @@
 #   $0 OPTION...
 #   $0 LONG_OPTION
 
+# Exit Codes:
+# 0 - Success
+# 1 - File Read Error (Missing, Bad Permitions, Incorrect Formating)
+# 2 - ???
+# 3 - Interupted.
+# 4 - Fault occured, program aborted.
+
+# Setting up a Test:__________________________________________________________
+# First you must create a test program. This must be located in a subdirectory
+# of the [test] directory and the program must have the same name as the
+# subdirectory. (I might have to add some config file for that.)
+
+# Then you need to create the test files.
+
 # Test files:
 # *.tst : Test specification.
 # *.in  : Test input, auto tests only.
@@ -16,13 +30,6 @@
 # *.err : Expected error output.
 # *.pr  : Prompt file, prompts user, manual tests only.
 # *.res : Results file, system generated.
-
-# Exit Codes:
-# 0 - Success
-# 1 - File Read Error (Missing, Bad Permitions, Incorrect Formating)
-# 2 - ???
-# 3 - Interupted.
-# 4 - Fault occured, program aborted.
 
 # There are three main tags on error messages:
 # ERROR: this is an error message, usually from incorrect usage.
@@ -388,7 +395,7 @@ function run_test_auto ()
   #$1/$2 ${args} > ${templist[out]} 2> ${templist[err]}
 
   # stdout and stderr to the same file.
-  $1/$2 $args > ${templist[out]}
+  $1/$2 $args > ${templist[out]} 2>&1
 
   # Run a comparison between the expected and actual output.
   tempfileindex mk diff
