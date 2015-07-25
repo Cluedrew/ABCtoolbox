@@ -119,21 +119,21 @@
 # Or global varibles if you would like.
 
 # Get the directory this script is in.
-# Should always be one above the test program directorys.
+# Should always be one above the test program directories.
 DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 # Stole that line.
 
-# Names of the test and the program that runs it.
-PROG=
-TEST=
-# Not sure about all caps, are these close enough to system vars?
+# Where is the caller calling from (in case we have to go back)
+CDIR=$(pwd)
+
+
 
 # Temperary file names.
 declare -A templist
 
 # !!! These may all have to be updated depending on the usage. !!!
 # Creating all the test file names.
-prefix=$DIR/$1/$2
+prefix=$1/$2
 tstfile=${prefix}.tst
 infile=${prefix}.in
 outfile=${prefix}.out
@@ -148,7 +148,7 @@ for type in tst in out err pr res; do
 done
 
 # Creating the program's name.
-program=$DIR/$1/$1
+program=$1/$1
 
 # If a .res file contains this followed by a newline, the test passed.
 pass_mark=_PASS_
@@ -392,29 +392,36 @@ function run_test_auto ()
 
   # Run the program with redirects.
   # stdout and stderr to different files.
-  #$1/$2 ${args} > ${templist[out]} 2> ${templist[err]}
+  #$1/$1 ${args} > ${templist[out]} 2> ${templist[err]}
 
   # stdout and stderr to the same file.
-  $1/$2 $args > ${templist[out]} 2>&1
+  $1/$1 $args > ${templist[out]} 2>&1
 
   # Run a comparison between the expected and actual output.
   tempfileindex mk diff
-  diff -q -y ${templist[out]} ${outfile} > ${templist[diff]}
+  diff ${templist[out]} ${outfile} > ${templist[diff]}
+
+  local pass=$?
 
   # Save test results
   # Check for the results of the comparison.
   # A difference was detected.
-  if [ $? -eq 1 ]; then
+  if [ $pass -eq 1 ]; then
     echo "Test failed: diffrence detected in output:" > $resfile
     cat ${templist[diff]} >> $resfile
-    return 1
+    echo "Test $2 for $1 failed"
 
   # No difference between the files was found.
   else
     echo $pass_mark > $resfile
+    echo "Test $2 for $1 passed"
   fi
 
-  return 0
+  tempfileindex rm diff
+  tempfileindex rm out
+  tempfileindex rm err
+
+  return $pass
 }
 
 # Usage: run_test_manual PRAGRAM TEST
@@ -446,12 +453,8 @@ function run_test_manual ()
 # Main Code___________________________________________________________________
 
 # Set Up
-# -------------
-#echo "TESTING"
-
-#safe_exit 0
-# -------------
-
+# Change to the script's directory so we can cut down on the length of names.
+cd $DIR
 
 
 
