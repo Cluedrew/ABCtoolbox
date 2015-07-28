@@ -19,7 +19,12 @@
 # Setting up a Test:__________________________________________________________
 # First you must create a test program. This must be located in a subdirectory
 # of the [test] directory and the program must have the same name as the
-# subdirectory. (I might have to add some config file for that.)
+# subdirectory.
+# This is controlled from a config file, litterally called config, put into
+# the subdirectory with the program.
+
+# NOTE: When ever writing any commands in the test files, remember that the
+#   test harness will change the working directory to the test subdirectory.
 
 # Then you need to create the test files.
 
@@ -68,9 +73,11 @@
 #     ( ) Check for source files
 #     ( ) Check for destination file
 #     ( ) Check for extra files?
+#   ( ) Check configuration file
 #   ( ) Read in test paramiters
 #     (-) get_setting helper function
 #     (-) get_flag helper function
+#   ( ) Decend into the program directories to run code.
 # ( ) Auto Test Set Up
 #   ( ) Create Temp Files
 #     (-) tempfileindex helper function
@@ -128,6 +135,9 @@ CDIR=$(pwd)
 
 
 
+# Program and Test name, left blank if not given.
+declare prog_n= test_n=
+
 # Temperary file names.
 declare -A templist
 
@@ -143,7 +153,9 @@ resfile=${prefix}.res
 
 # Possible storage for test files.
 declare -A flst
-for type in tst in out err pr res; do
+# All the types of test files.
+testfiletypes="in out err pr res"
+for type in ${testfiletypes}; do
   flst[$type]=$prefix.$type
 done
 
