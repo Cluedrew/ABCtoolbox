@@ -402,18 +402,31 @@ function run_test_auto ()
   tempfileindex mk out
   tempfileindex mk err
 
-  # Run the program with redirects.
-  # stdout and stderr to different files.
-  #$1/$1 ${args} > ${templist[out]} 2> ${templist[err]}
+  local ecode=
 
-  # stdout and stderr to the same file.
-  $1/$1 $args > ${templist[out]} 2>&1
+  # Run the program with redirects.
+  if [ -e $errfile ]; then
+    # stdout and stderr to different files.
+    $1/$1 $args 1> ${templist[out]} 2> ${templist[err]}
+    ecode=$?
+  else
+    # stdout and stderr to the same file.
+    $1/$1 $args &> ${templist[out]}
+    ecode=$?
+  fi
 
   # Run a comparison between the expected and actual output.
+  # I need a solution to allow the output to be compared with an empty !!!
+  #   file. Possibly have some blank special file.
   tempfileindex mk diff
   diff ${templist[out]} ${outfile} > ${templist[diff]}
 
   local pass=$?
+
+  #if [ -e $errfile ]; then
+  #  tempfileindex mk derr
+  #  diff ${templist[err]} ${errfile} > ${templist[derr]}
+  #fi
 
   # Save test results
   # Check for the results of the comparison.
