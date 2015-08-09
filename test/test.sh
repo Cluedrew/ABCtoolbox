@@ -75,7 +75,7 @@
 #     ( ) Check for extra files?
 #   ( ) Check configuration file
 #   ( ) Read in test paramiters
-#     (-) get_setting helper function
+#     (?) get_setting helper function
 #     (-) get_flag helper function
 #   ( ) Decend into the program directories to run code.
 # ( ) Auto Test Set Up
@@ -292,29 +292,43 @@ function ask_question ()
 }
 
 # Get Setting: Return part of a line from a file.
-# Usage: get_setting FILE LINEMARK
-# This function is to read in options from the .tst file, but it can
-#   be used in other cases. Echos the result of the read.
+# Usage: get_setting FILE... LINEMARK
+# Read each FILE in turn until one contains a line beginning with LINEMARK.
+#  If such a line is found echos the rest of that line and returns 0.
+#  If no such line is found nothing is echoed and 1 is returned.
+#  If multiple lines are found in the same file the function will not echo
+#  anything due to the conflict and will return the number of lines found.
 function get_setting ()
 {
-  # Check for a single result.
-  local lines=$(grep -Ec "^$2" $1)
-
-  if [ "$lines" -eq 1 ]; then
-    local tempresult=$(grep -E "^$2" $1)
-    echo ${tempresult#$2}
-    return 0
-  elif [ "$lines" -eq 0 ]; then
-    return 1
-  else
-    return $lines
+  # Check for valid use.
+  if [ 2 -gt $# ]; then
+    echo "FAULT: get_setting requires atleast two arguments."
+    exit 4
   fi
+
+  # Check for a single result.
+  local lines=$(grep -Ec "^${!#}" $1)
+
+  while [ $# -gt 1 ]; do
+    if [ "$lines" -eq 1 ]; then
+      local tempresult=$(grep -E "^${!#}" $1)
+      echo ${tempresult#$2}
+      return 0
+    elif [ "$lines" -eq 0 ]; then
+      # Try the next file.
+      shift 1
+    else
+      return $lines
+    fi
+  done
+  # No matches for the setting found.
+  return 1
 }
 
-# Get Flag:
+# Get Flag: Seach for a partular word in a file.
 # Usage: get_flag FILE FLAG
-# Check the for flags in a file. Flags must take up an entire word. Returns 0
-#  if the flag is found, 1 otherwise and echos the number of flags found.
+# Check the for FLAG in FILE. Flags must take up an entire word. Returns 0
+#  if the flag is found, 1 otherwise. Echos the number of flags found.
 function get_flag ()
 {
   local flags=$(grep -Ecw "$2" $1)
@@ -334,7 +348,7 @@ function get_flag ()
 #   also be used. Also the type of test.
 function poll_test_status ()
 {
-  # All appearing letters: ... I need to thing about this system.
+  # All appearing letters: ... I need to think about this system.
   # Dd? Rr MAx Pf Uo
 
   # Check to see if the test is defined
@@ -402,6 +416,8 @@ function run_test_auto ()
   tempfileindex mk out
   tempfileindex mk err
 
+  local args=$(get_setting ${tstfile} "args:")
+
   local ecode=
 
   # Run the program with redirects.
@@ -445,6 +461,9 @@ function run_test_auto ()
   tempfileindex rm diff
   tempfileindex rm out
   tempfileindex rm err
+  if [ -e $errfile ]; then
+    tempfileindex rm derr
+  fi
 
   return $pass
 }
