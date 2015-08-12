@@ -1,2 +1,2 @@
-Test Type: auto
-Libs: hello-world
+test-type: auto
+args:

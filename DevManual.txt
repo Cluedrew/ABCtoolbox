@@ -61,6 +61,8 @@ File Structure:===============================================================
 |||  set there of will be based around a program that uses part of the ABC
 |||  tool box.
 |||
+|||config: Instructions to the test harness for how to handle an test program.
+|||
 |||<test>.tst: A file containing various instructions on how to run the test
 |||  for test.sh.
 |||

@@ -75,7 +75,7 @@
 #     ( ) Check for extra files?
 #   ( ) Check configuration file
 #   ( ) Read in test paramiters
-#     (?) get_setting helper function
+#     (-) get_setting helper function
 #     (-) get_flag helper function
 #   ( ) Decend into the program directories to run code.
 # ( ) Auto Test Set Up
@@ -301,22 +301,26 @@ function ask_question ()
 function get_setting ()
 {
   # Check for valid use.
-  if [ 2 -gt $# ]; then
-    echo "FAULT: get_setting requires atleast two arguments."
+  if [ 1 -ge $# ]; then
+    echo "FAULT: get_setting requires atleast one argument."
     exit 4
   fi
 
-  # Check for a single result.
-  local lines=$(grep -Ec "^${!#}" $1)
+  local lines=
 
   while [ $# -gt 1 ]; do
+    # Find the number of matches.
+    lines=$(grep -Ec "^${!#}" $1)
+
+    # One match: print result and finish
     if [ "$lines" -eq 1 ]; then
       local tempresult=$(grep -E "^${!#}" $1)
-      echo ${tempresult#$2}
+      echo ${tempresult#${!#}}
       return 0
+    # No matches: Try the next file.
     elif [ "$lines" -eq 0 ]; then
-      # Try the next file.
       shift 1
+    # Multiple matches: return conflict result
     else
       return $lines
     fi
