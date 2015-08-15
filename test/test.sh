@@ -412,15 +412,34 @@ trap "safe_exit 3 'ERROR: forced quit from testing'" SIGHUP SIGINT SIGTERM
 
 
 
+# run_test_*
+#   The test functions all run tests, they all have the same interface and
+# accomplish the same general task. The all run a test using a test program,
+# how they differ is how they run this test.
+#   By same interface I mean the arguments and exit codes follow the same
+# standard, input and output will vary.
+# Usage: run_test_* PROGRAM TEST
+# Exit Codes:
+# 0 - Test successful
+# 1 - Test failed but no errors?
+# 2 - Test error
+# 3 - Set up error (missing files, etc.)
+# 4 - Fault occured
+
 # Usage: run_test_auto PROGRAM TEST
 # Runs an auto test with in, out & err files.
 function run_test_auto ()
 {
+  # Collect the args
+  local args=$(get_setting ${tstfile} "args:")
+  if [ $? -gt 1 ]; then
+    echo "ERROR: Multiple instances of 'args' for the argument list."
+    return 3
+  fi
+
   # Create a temp file
   tempfileindex mk out
   tempfileindex mk err
-
-  local args=$(get_setting ${tstfile} "args:")
 
   local ecode=
 
@@ -476,6 +495,12 @@ function run_test_auto ()
 # Run an interactive manual test with a pr file.
 function run_test_manual ()
 {
+  # Collect the args
+  local args=$(get_setting ${tstfile} "args:")
+  if [ $? -gt 1 ]; then
+    echo "ERROR: Multiple instances of 'args' for the argument list."
+  fi
+
   # Prompt the user.
   $(< $prfile)
 
