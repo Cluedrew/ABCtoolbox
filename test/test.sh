@@ -42,30 +42,12 @@
 # WARN: Non-critical error, a hicup noticable only because it might mean
 #       a more critical error occured elsewhere.
 
-# The *.tst file:
-# This file must have three particular lines in it, all of which begin with
-# a label and then have some option.
-# "Test Type:" must be followed with either auto or manual. This controls
-# whether or not the script will run an interactive test or not. An auto test
-# is not interactive, the program is run, given input from the *.in file and
-# the output is compared to the contents of a *.out file. If they actual and
-# expected output differ than the test fails. In a manual test the user is
-# first prompted with intstruction from the *.pr file, they can skip the test
-# if they want here. If they continue the test the program and then when the
-# program ends they are asked for their opition. The auto tests are usually
-# favoured over the manual tests, but if there is some interaction and display
-# that at text file/diff can't analyse then the manual tests are an option.
-# "Exit Code:" Followed by a number. If the program does not exit with this
-# value than the test fails and this error is added to the other results.
-# "Call Args:" Add to the command line argument that calls the program.
-# <program>/<program> {Call Args}
-
 # Check List__________________________________________________________________
 # { } Not yet complete.
 # {?} Complete, but untested or buggy.
 # {-} Finished and tested.
-# Note that I only test for proper use, the system is not very robust.
-#   This is especially true for the internals.
+# Note that I generally only test for proper use, the system is not very
+#   robust. This is especially true for the internals.
 #
 # ( ) General Set Up
 #   ( ) Argument Checking
@@ -77,6 +59,10 @@
 #   ( ) Read in test paramiters
 #     (-) get_setting helper function
 #     (-) get_flag helper function
+#   ( ) Update test programs if they are older than the tools.
+#     (?) compare the age of programs to tools with comp_tool_time
+#     ( ) make update method (call make)
+#     ( ) generic update method (read in a command to execute)
 #   ( ) Decend into the program directories to run code.
 # ( ) Auto Test Set Up
 #   ( ) Create Temp Files
@@ -136,7 +122,7 @@ CDIR=$(pwd)
 
 
 # Program and Test name, left blank if not given.
-declare prog_n= test_n=
+declare prog_name= test_name=
 
 # Temperary file names.
 declare -A templist
@@ -161,12 +147,44 @@ done
 
 # Creating the program's name.
 program=$1/$1
+#testprog=$prog_name/$prog_name
+
+# The config file
+#configfile=${prog_name}/config
+configfile=$1/config
 
 # If a .res file contains this followed by a newline, the test passed.
 pass_mark=_PASS_
 
 # Editor, when asking for feedback the program will use this editor.
 editor=nano
+
+# Working idea, a function to set all varibles dependant on PROGRAM & TEST.
+# Usage: update_pt_vars PROGRAM TEST
+#function update_pt_vars ()
+#{
+#  if [ 2 -ne $# ]; then
+#    echo "FAULT: update_pt_vars given incorrect number of args: $#"
+#    exit 4
+#  fi
+#
+#  prog_name=$1
+#
+#  # Files for the program.
+#  configfile=$prog_name/config
+#  execfile=$prog_name/$prog_name
+#
+#  test_name=$2
+#
+#  # Files for the test.
+#  prefix=$prog_name/$test_name
+#  tstfile=$prefix.tst
+#  infile=$prefix.in
+#  outfile=$prefix.out
+#  errfile=$prefix.err
+#  prfile=$prefix.pr
+#  resfile=$prefix.res
+#}
 
 # Functions_1_________________________________________________________________
 # Helper Functions are in this section.
@@ -293,29 +311,33 @@ function ask_question ()
 
 # Get Setting: Return part of a line from a file.
 # Usage: get_setting FILE... LINEMARK
-# Read each FILE in turn until one contains a line beginning with LINEMARK.
+# Read each FILE in turn until one contains a line beginning with `LINEMARK:'.
 #  If such a line is found echos the rest of that line and returns 0.
 #  If no such line is found nothing is echoed and 1 is returned.
 #  If multiple lines are found in the same file the function will not echo
 #  anything due to the conflict and will return the number of lines found.
+# Currantly just assumes the FILE(s) exist. ???
 function get_setting ()
 {
   # Check for valid use.
-  if [ 1 -ge $# ]; then
-    echo "FAULT: get_setting requires atleast one argument."
+  if [ 0 -eq $# ]; then
+    echo "FAULT: get_setting requires at least a LINEMARK."
     exit 4
+  #elif [ 1 -eq $# ]; then
+  #  echo "FAULT: get_setting had no files to check."
+  #  exit 4
   fi
 
   local lines=
 
   while [ $# -gt 1 ]; do
     # Find the number of matches.
-    lines=$(grep -Ec "^${!#}" $1)
+    lines=$(grep -Ec "^${!#}:" $1)
 
     # One match: print result and finish
     if [ "$lines" -eq 1 ]; then
-      local tempresult=$(grep -E "^${!#}" $1)
-      echo ${tempresult#${!#}}
+      local tempresult=$(grep -E "^${!#}:" $1)
+      echo ${tempresult#${!#}:}
       return 0
     # No matches: Try the next file.
     elif [ "$lines" -eq 0 ]; then
@@ -333,6 +355,7 @@ function get_setting ()
 # Usage: get_flag FILE FLAG
 # Check the for FLAG in FILE. Flags must take up an entire word. Returns 0
 #  if the flag is found, 1 otherwise. Echos the number of flags found.
+# Currantly assumes FILE exists and is readable. ???
 function get_flag ()
 {
   local flags=$(grep -Ecw "$2" $1)
@@ -374,7 +397,7 @@ function poll_test_status ()
   fi
 
   # What is the test type?
-  local tsttype=$(get_setting $DIR/$1/$2 "Test Type:")
+  local tsttype=$(get_setting $DIR/$1/$2 "Test Type")
   if [ auto == "$tsttype" ]; then
     tsttype=A
   elif [ manual == "$tsttype" ]; then
@@ -382,6 +405,30 @@ function poll_test_status ()
   else
     tsttype=x
   fi
+  return 0
+}
+
+# Comp Tool Time
+# Usage: comp_tool_time FILE TOOL...
+# Compare the time stamp of a FILE against the output files for a set of
+#   TOOLs. The output files being the public header and library file in the
+#   include directory.
+# EXIT: 0 - FILE is up to date
+#       1 - FILE is outdated
+function comp_tool_time ()
+{
+  # Path to the include directory where the finished tools are.
+  local td=$DIR/../include
+
+  local compfile=$1
+  shift 1
+
+  for tool; do
+    if [ $compfile -nt $td/$tool.hpp -o $compfile -nt $td/lib$tool.a ]; then
+      return 1
+    fi
+  done
+
   return 0
 }
 
@@ -431,7 +478,7 @@ trap "safe_exit 3 'ERROR: forced quit from testing'" SIGHUP SIGINT SIGTERM
 function run_test_auto ()
 {
   # Collect the args
-  local args=$(get_setting ${tstfile} "args:")
+  local args=$(get_setting ${tstfile} "args")
   if [ $? -gt 1 ]; then
     echo "ERROR: Multiple instances of 'args' for the argument list."
     return 3
@@ -496,7 +543,7 @@ function run_test_auto ()
 function run_test_manual ()
 {
   # Collect the args
-  local args=$(get_setting ${tstfile} "args:")
+  local args=$(get_setting ${tstfile} "args")
   if [ $? -gt 1 ]; then
     echo "ERROR: Multiple instances of 'args' for the argument list."
   fi
@@ -545,13 +592,26 @@ elif [[ --editor == "$1" ]]; then
 
 # Run a single test.
 elif [ 2 == $# ]; then
+  # Set the program name and test name.
+  prog_name=$1
+  test_name=$2
+
+  # Get the test type, first checking for an override then for the defaut.
+  test_type=
+  if [ -e ${tstfile} ]; then
+    test_type=$(get_setting ${tstfile} "test-type")
+  fi
+  if [ -z ${test_type} ]; then
+    test_type=$(get_setting ${cfgfile} "test-type")
+  fi
+
   # Analzye the test file.
   # Is it an "auto" or "manual" test?
-  test=$(get_setting ${tstfile} "Test Type:")
+  #test=$(get_setting ${tstfile} "Test Type")
   # What is the expected exit code?
-  code=$(get_setting ${tstfile} "Exit Code:")
+  #code=$(get_setting ${tstfile} "Exit Code")
   # Arguments to pass to the call. (Whole call?)
-  call=$(get_setting ${tstfile} "Call Args:")
+  #call=$(get_setting ${tstfile} "Call Args")
 
   if [ ${test} = auto ]; then
     run_test_auto ${1} ${2}
