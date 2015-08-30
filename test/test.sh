@@ -10,7 +10,7 @@
 #   $0 LONG_OPTION
 
 # Exit Codes:
-# 0 - Success
+# 0 - Success (This does not imply the test passed, just successful run.)
 # 1 - File Read Error (Missing, Bad Permitions, Incorrect Formating)
 # 2 - ???
 # 3 - Interupted.
@@ -61,8 +61,7 @@
 #     (-) get_flag helper function
 #   ( ) Update test programs if they are older than the tools.
 #     (?) compare the age of programs to tools with comp_tool_time
-#     ( ) make update method (call make)
-#     ( ) generic update method (read in a command to execute)
+#     ( ) update_program helper to select and run the update method
 #   ( ) Decend into the program directories to run code.
 # ( ) Auto Test Set Up
 #   ( ) Create Temp Files
@@ -127,15 +126,22 @@ declare prog_name= test_name=
 # Temperary file names.
 declare -A templist
 
-# !!! These may all have to be updated depending on the usage. !!!
-# Creating all the test file names.
-prefix=$1/$2
-tstfile=${prefix}.tst
-infile=${prefix}.in
-outfile=${prefix}.out
-errfile=${prefix}.err
-prfile=${prefix}.pr
-resfile=${prefix}.res
+# Creating the program's name.
+declare execfile= configfile=
+#program=$1/$1
+#testprog=$prog_name/$prog_name
+
+# The config file
+#configfile=${prog_name}/config
+#configfile=$1/config
+
+# Creating all the test file names, but they are left blank for now.
+tstfile=
+infile=
+outfile=
+errfile=
+prfile=
+resfile=
 
 # Possible storage for test files.
 declare -A flst
@@ -145,46 +151,42 @@ for type in ${testfiletypes}; do
   flst[$type]=$prefix.$type
 done
 
-# Creating the program's name.
-program=$1/$1
-#testprog=$prog_name/$prog_name
-
-# The config file
-#configfile=${prog_name}/config
-configfile=$1/config
-
 # If a .res file contains this followed by a newline, the test passed.
 pass_mark=_PASS_
 
 # Editor, when asking for feedback the program will use this editor.
 editor=nano
 
-# Working idea, a function to set all varibles dependant on PROGRAM & TEST.
+# Update PT (Program & Test) Vars
 # Usage: update_pt_vars PROGRAM TEST
-#function update_pt_vars ()
-#{
-#  if [ 2 -ne $# ]; then
-#    echo "FAULT: update_pt_vars given incorrect number of args: $#"
-#    exit 4
-#  fi
-#
-#  prog_name=$1
-#
-#  # Files for the program.
-#  configfile=$prog_name/config
-#  execfile=$prog_name/$prog_name
-#
-#  test_name=$2
-#
-#  # Files for the test.
-#  prefix=$prog_name/$test_name
-#  tstfile=$prefix.tst
-#  infile=$prefix.in
-#  outfile=$prefix.out
-#  errfile=$prefix.err
-#  prfile=$prefix.pr
-#  resfile=$prefix.res
-#}
+# Sets a series of global varibles that would be initialized on start up but
+#   they are dependant on the PRAGRAM being run and which TEST is being used
+#   with it.
+# Exit with 0 or aborts.
+function update_pt_vars ()
+{
+  if [ 2 -ne $# ]; then
+    echo "FAULT: update_pt_vars given incorrect number of args: $#"
+    exit 4
+  fi
+
+  prog_name=$1
+
+  # Files for the program.
+  configfile=$prog_name/config
+  execfile=$prog_name/$prog_name
+
+  test_name=$2
+
+  # Files for the test.
+  local prefix=$prog_name/$test_name
+  tstfile=$prefix.tst
+  infile=$prefix.in
+  outfile=$prefix.out
+  errfile=$prefix.err
+  prfile=$prefix.pr
+  resfile=$prefix.res
+}
 
 # Functions_1_________________________________________________________________
 # Helper Functions are in this section.
@@ -397,7 +399,7 @@ function poll_test_status ()
   fi
 
   # What is the test type?
-  local tsttype=$(get_setting $DIR/$1/$2 "Test Type")
+  local tsttype=$(get_setting $DIR/$1/$2 "test-type")
   if [ auto == "$tsttype" ]; then
     tsttype=A
   elif [ manual == "$tsttype" ]; then
@@ -430,6 +432,40 @@ function comp_tool_time ()
   done
 
   return 0
+}
+
+# Update Program
+# Usage: update_program PROGRAM
+# Make sure a program is newer than the tools it tests, if not try to update
+#   it so that it is newer.
+# Exit Codes:
+# 0 - No update nessary or program successfully updated
+# 1 - Program out of date and not updated
+function update_program ()
+{
+  # Check the times, skip update if the program is up to date.
+  if comp_tool_time $1/$1 $(get_setting $1/config "tools"); then
+    return 0
+  fi
+
+  # Get the number of flags/settings for the update methods.
+  local uwm=$(get_flag $configfile "update-with-make")
+  local ubc=$(grep -Ec "^update:" $configfile)
+
+  if [ 1 -eq $(($uwm+$ubc)) ]; then
+    # Update by calling a makefile
+    if [ 1 == $uwm ]; then
+      make -C $1 && return 0 || return 1
+    # Update with a custom command
+    else
+    fi
+  elif [ 0 -eq $(($uwm+$ubc)) ]; then
+    echo "No update method specified"
+  else
+    echo "Conflicting update methods"
+  fi
+  return 1
+  # Unfinished                                                             !!!
 }
 
 
@@ -592,30 +628,19 @@ elif [[ --editor == "$1" ]]; then
 
 # Run a single test.
 elif [ 2 == $# ]; then
-  # Set the program name and test name.
-  prog_name=$1
-  test_name=$2
+  update_pt_vars $1 $2
 
   # Get the test type, first checking for an override then for the defaut.
   test_type=
   if [ -e ${tstfile} ]; then
-    test_type=$(get_setting ${tstfile} "test-type")
-  fi
-  if [ -z ${test_type} ]; then
-    test_type=$(get_setting ${cfgfile} "test-type")
+    test_type=$(get_setting ${tstfile} ${configfile} "test-type")
+  else
+    test_type=$(get_setting ${configfile} "test-type")
   fi
 
-  # Analzye the test file.
-  # Is it an "auto" or "manual" test?
-  #test=$(get_setting ${tstfile} "Test Type")
-  # What is the expected exit code?
-  #code=$(get_setting ${tstfile} "Exit Code")
-  # Arguments to pass to the call. (Whole call?)
-  #call=$(get_setting ${tstfile} "Call Args")
-
+  # Select the test method.
   if [ ${test} = auto ]; then
     run_test_auto ${1} ${2}
-
   elif [ ${test} = manual ]; then
     run_test_manual ${1} ${2}
 
