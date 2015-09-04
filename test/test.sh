@@ -89,6 +89,7 @@
 #   ( ) Option to force running a test (-t)
 #   ( ) Check (and maybe set) the editor used for results (--editor)
 #   ( ) Run some subset of tests (--run-all)
+#   ( ) Clean up extra files that may have been left behind (--clean-tmp)
 
 # Table of Implementation_____________________________________________________
 # Variables: Set up of the global variables.
@@ -126,14 +127,8 @@ declare prog_name= test_name=
 # Temperary file names.
 declare -A templist
 
-# Creating the program's name.
+# Creating the program files, the program itself and it's config, set later.
 declare execfile= configfile=
-#program=$1/$1
-#testprog=$prog_name/$prog_name
-
-# The config file
-#configfile=${prog_name}/config
-#configfile=$1/config
 
 # Creating all the test file names, but they are left blank for now.
 tstfile=
@@ -444,9 +439,9 @@ function comp_tool_time ()
 function update_program ()
 {
   # Check the times, skip update if the program is up to date.
-  if comp_tool_time $1/$1 $(get_setting $1/config "tools"); then
-    return 0
-  fi
+  #if comp_tool_time $1/$1 $(get_setting $1/config "tools"); then
+  #  return 0
+  #fi
 
   # Get the number of flags/settings for the update methods.
   local uwm=$(get_flag $configfile "update-with-make")
@@ -455,17 +450,27 @@ function update_program ()
   if [ 1 -eq $(($uwm+$ubc)) ]; then
     # Update by calling a makefile
     if [ 1 == $uwm ]; then
-      make -C $1 && return 0 || return 1
+      # If the tools are out of date, auto-update the makefile.
+      local forceflag="-B"
+      if comp_tool_time $1/$1 $(get_setting $1/config "tools"); then
+        forceflag=""
+      fi
+      make $forceflag -C $1 && return 0 || return 1
+
     # Update with a custom command
     else
+      # Decend into the directory and run the command.
+      local command=$(get_setting $1/config "update")
+      cd $1 && $command && cd $DIR && return 0 || return 1
     fi
   elif [ 0 -eq $(($uwm+$ubc)) ]; then
     echo "No update method specified"
   else
     echo "Conflicting update methods"
   fi
+  echo "Please have ONE of: the update-with-make flag or the update setting"
+  echo "in $1/config to specify the auto update method."
   return 1
-  # Unfinished                                                             !!!
 }
 
 
