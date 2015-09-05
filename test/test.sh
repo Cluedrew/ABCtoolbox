@@ -307,7 +307,7 @@ function ask_question ()
 }
 
 # Get Setting: Return part of a line from a file.
-# Usage: get_setting FILE... LINEMARK
+# Usage: get_setting [FILE...] LINEMARK
 # Read each FILE in turn until one contains a line beginning with `LINEMARK:'.
 #  If such a line is found echos the rest of that line and returns 0.
 #  If no such line is found nothing is echoed and 1 is returned.
@@ -320,9 +320,6 @@ function get_setting ()
   if [ 0 -eq $# ]; then
     echo "FAULT: get_setting requires at least a LINEMARK."
     exit 4
-  #elif [ 1 -eq $# ]; then
-  #  echo "FAULT: get_setting had no files to check."
-  #  exit 4
   fi
 
   local lines=
@@ -451,6 +448,7 @@ function update_program ()
     # Update by calling a makefile
     if [ 1 == $uwm ]; then
       # If the tools are out of date, auto-update the makefile.
+      # Otherwise let the makefile update if it wants to.
       local forceflag="-B"
       if comp_tool_time $1/$1 $(get_setting $1/config "tools"); then
         forceflag=""
@@ -459,10 +457,27 @@ function update_program ()
 
     # Update with a custom command
     else
-      # Decend into the directory and run the command.
-      local command=$(get_setting $1/config "update")
-      cd $1 && $command && cd $DIR && return 0 || return 1
+      # Check to see if the file is out of date.
+      local needs_update=no
+      if comp_tool_time $1/$1 $(get_setting $1/config "tools"); then
+        local sourcefile=
+        for sourcefile in $(get_setting $1/config "source-files"); do
+          if [ $execfile -nt $1/$sourcefile ]; then
+            needs_update=yes
+          fi
+        done
+      else
+        needs_update=yes
+      fi
+      # Now, only if we need to, update the file.
+      if [ yes == $needs_update ]; then
+        # Decend into the directory and run the command.
+        local command=$(get_setting $1/config "update")
+        cd $1 && $command && cd $DIR && return 0 || return 1
+      fi
     fi
+
+  # If there isn't excactly one update method send out an error.
   elif [ 0 -eq $(($uwm+$ubc)) ]; then
     echo "No update method specified"
   else
