@@ -1,10 +1,10 @@
   A simple program for testing the hello world function... OK it and the hello
 world program are for testing the general set-up of the ABC Tool Box.
 
-update:
-g++ test/hello/hello.cpp -L/usr/local/include/ABC -lhello-world -o test/hello/hello
+update: g++ hello.cpp -L/usr/local/include/ABC -lhello-world -o hello
 
 tools: hello-world
+source-files: hello.cpp
 
 test-type: auto
 tests: hello-test
