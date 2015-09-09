@@ -443,6 +443,8 @@ function update_program ()
   # Get the number of flags/settings for the update methods.
   local uwm=$(get_flag $configfile "update-with-make")
   local ubc=$(grep -Ec "^update:" $configfile)
+  echo uwm:$uwm ubc:$ubc
+
 
   if [ 1 -eq $(($uwm+$ubc)) ]; then
     # Update by calling a makefile
@@ -458,6 +460,7 @@ function update_program ()
     # Update with a custom command
     else
       # Check to see if the file is out of date.
+      echo update by command
       local needs_update=no
       if comp_tool_time $1/$1 $(get_setting $1/config "tools"); then
         local sourcefile=
@@ -473,7 +476,10 @@ function update_program ()
       if [ yes == $needs_update ]; then
         # Decend into the directory and run the command.
         local command=$(get_setting $1/config "update")
+        echo "${command}"
         cd $1 && $command && cd $DIR && return 0 || return 1
+      else
+        return 0
       fi
     fi
 
@@ -632,6 +638,10 @@ function run_test_manual ()
 # Change to the script's directory so we can cut down on the length of names.
 cd $DIR
 
+update_pt_vars hello hello-test
+update_program hello
+safe_exit
+
 
 
 # Main Body
@@ -649,6 +659,7 @@ elif [[ --editor == "$1" ]]; then
 # Run a single test.
 elif [ 2 == $# ]; then
   update_pt_vars $1 $2
+  update_program $prog_name
 
   # Get the test type, first checking for an override then for the defaut.
   test_type=
