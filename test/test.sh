@@ -418,7 +418,7 @@ function comp_tool_time ()
   shift 1
 
   for tool; do
-    if [ $compfile -nt $td/$tool.hpp -o $compfile -nt $td/lib$tool.a ]; then
+    if [ $compfile -ot $td/$tool.hpp -o $compfile -ot $td/lib$tool.a ]; then
       return 1
     fi
   done
@@ -429,50 +429,40 @@ function comp_tool_time ()
 # Update Program
 # Usage: update_program PROGRAM
 # Make sure a program is newer than the tools it tests, if not try to update
-#   it so that it is newer.
+#   it so that it is newer. Requires pt varibles to be set.
 # Exit Codes:
 # 0 - No update nessary or program successfully updated
 # 1 - Program out of date and not updated
 function update_program ()
 {
-  # Check the times, skip update if the program is up to date.
-  #if comp_tool_time $1/$1 $(get_setting $1/config "tools"); then
-  #  return 0
-  #fi
-
   # Get the number of flags/settings for the update methods.
   local uwm=$(get_flag $configfile "update-with-make")
   local ubc=$(grep -Ec "^update:" $configfile)
   echo uwm:$uwm ubc:$ubc
 
+  local needs_update=no
+  if comp_tool_time $1/$1 $(get_setting $1/config "tools"); then
+    local sourcefile=
+    for sourcefile in $(get_setting $1/config "source-files"); do
+      if [ $execfile -ot $1/$sourcefile ]; then
+        needs_update=yes
+      fi
+    done
+  else
+    needs_update=yes
+  fi
 
   if [ 1 -eq $(($uwm+$ubc)) ]; then
-    # Update by calling a makefile
+    # Update by calling a makefile (soft & hard updates)
     if [ 1 == $uwm ]; then
-      # If the tools are out of date, auto-update the makefile.
-      # Otherwise let the makefile update if it wants to.
-      local forceflag="-B"
-      if comp_tool_time $1/$1 $(get_setting $1/config "tools"); then
-        forceflag=""
+      if [ "yes" == $needs_update ]; then
+        make -B -C $1 && return 0 || return 1
+      else
+        make -C $1 && return 0 || return 1
       fi
-      make $forceflag -C $1 && return 0 || return 1
 
     # Update with a custom command
     else
-      # Check to see if the file is out of date.
-      echo update by command
-      local needs_update=no
-      if comp_tool_time $1/$1 $(get_setting $1/config "tools"); then
-        local sourcefile=
-        for sourcefile in $(get_setting $1/config "source-files"); do
-          if [ $execfile -nt $1/$sourcefile ]; then
-            needs_update=yes
-          fi
-        done
-      else
-        needs_update=yes
-      fi
-      # Now, only if we need to, update the file.
       if [ yes == $needs_update ]; then
         # Decend into the directory and run the command.
         local command=$(get_setting $1/config "update")
