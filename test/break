@@ -1,0 +1,32 @@
+Since test.sh is getting close to 700 lines I think I might have to go along
+with a plan to break it into parts. However to do this I need to break it
+along lines over which minimal interaction occurs.
+
+First off there may be a common header that sets up some global varibles.
+Then each test method is more or less independant.
+Program updates are seprate from the tests themselves.
+Result polling can be handled on its own.
+Set up checks can (in some cases) be handled independantly.
+Plus maybe one for overhead calling, with the usage and so on.
+
+So that is about six files all told. Possibly 1 plus a directory with all of
+the others. (Say test.sh and test.d/)
+Usage:
+test.sh run PROGRAM TEST
+  Run a single test.
+test.sh poll [ PROGRAM [ TEST ] ]
+  Poll data on all tests, a single test program or a single test.
+test.sh run-all [ FILTER ]...
+  Run all tests, possible limited by certain critiera such as assosiated
+ PROGRAM, test type or if it is out of date or not (last will probably be
+ default).
+test.sh update
+  Check for any out of date programs and update them. Although this will
+ often be done before a test anyway this allows the user to get it done in
+ one swoop (say after changing a tool).
+tesh.sh help
+  Desplay help information, may come with options to select topics.
+
+It would almost certainly be an improvement but is it a worth while
+improvement or just a thing. The system is currantly working and that carries
+some weight.
