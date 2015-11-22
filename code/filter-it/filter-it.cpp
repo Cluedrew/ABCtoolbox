@@ -4,6 +4,8 @@
 // Will later be converted to a epp/tpp file
 //   and included from the header (template).
 
+#include <stdexcept>
+
 namespace abc
 {
 
@@ -28,10 +30,10 @@ FilterIterator<ContainerT_>::FilterIterator
 }
 
 // Default Constructor (req)
-template<typename ContainerT_>
-FilterIterator<ContainerT_>::FilterIterator () :
-  container(nullptr), it(), filter(nullptr)
-{}
+//template<typename ContainerT_>
+//FilterIterator<ContainerT_>::FilterIterator () :
+//  container(nullptr), it(), filter(nullptr)
+//{}
 
 // Copy Constructor (req)
 template<typename ContainerT_>
@@ -100,7 +102,7 @@ template<typename ContainerT_>
 FilterIterator<ContainerT_> & FilterIterator<ContainerT_>::operator-- ()
 {
   do --it;
-  while (!filter(*it) && it != container.rend());
+  while (!filter(*it) && it != container.begin());
   return *this;
 }
 
@@ -110,7 +112,7 @@ FilterIterator<ContainerT_> FilterIterator<ContainerT_>::operator-- (int)
 {
   FilterIterator<ContainerT_> tmp = *this;
   do --it;
-  while (!filter(*it) && it != container.rend());
+  while (!filter(*it) && it != container.begin());
   return tmp;
 }
 

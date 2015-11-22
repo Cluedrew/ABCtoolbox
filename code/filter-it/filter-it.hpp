@@ -1,28 +1,12 @@
 #ifndef FILTER_ITERATOR_HPP
 #define FILTER_ITERATOR_HPP
 
-// WIP: I generally don't like iterators and don't know tones about them.
-
-/* Important: Currantly the defualt constructor creates an invalid object
- * that you can't really fix. The update functions and some checks will be
- * needed to fix that.
- */
-
-/* The filter iterator is a forward iterator that ignores some elements.
- * or it might be a bidirectional operator. Unless I can fined a really clean
- * way to do it I'm probably not going to have the four types of iterators.
+/* The FilterIterator is a special iterator that ignores functions that to not
+ * pass a predicate test. It is almost a Bidirectional iterator, lacking only
+ * the default constructor.
  *
- * Either way I am trying to built it as close to the C++ standard as possible
- * so it fits in. Because of its nature that may not be possible in every case
- * but I will try.
- *
- * Features for required for the standard are marked with (req).
- *
- * It should work with most containers in the standard template library, or
- * and container that implements:
- * - value_type local typedef as the type of the elements in the container.
- * - const_reference local typedef as ... through allocator<>
- * - iterator local typedef as the type of a forward/bidirection iterator.
+ * WIP: Bugs and limitations are abound, but it should work in most simple
+ * cases.
  */
 
 namespace abc
@@ -49,7 +33,7 @@ public:
   FilterIterator (ContainerT_ * container, filter_type filter);
 
   // Default Constructor (req)
-  FilterIterator ();
+  //FilterIterator ();
   // Copy Constructor (req)
   FilterIterator (FilterIterator const & other);
   // Deconstructor (req)

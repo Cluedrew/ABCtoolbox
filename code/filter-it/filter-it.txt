@@ -12,6 +12,7 @@ Feature Requests/Ideas:
   - a filter iterator for each of the four base types.
   - conversion to and from the iterator's base type.
 
+------------------------------------------------------------------------------
 Base iterator type that I might have to inherite from.
 
 template <typename Category, typename T, typename Distance = ptrdiff_t,
@@ -29,8 +30,53 @@ T will come from the container.
 Category will likely be bidirectional_iterator_tag
  if not then forward_iterator_tag
 
-Then I have to do something with the iterator_traits template... maybe?
+Then I have to do something with the iterator_traits template, or actually
+the generic definition will probably be enough, I just have to define all of:
+{
+  FilterIterator<...>::difference_type
+  FilterIterator<...>::value_type
+  FilterIterator<...>::pointer
+  FilterIterator<...>::reference
+  FilterIterator<...>::iterator_category
+}
 
+  Similarly I think I may manage to create the four types of iterators by
+creating a filter_iterator_base class template that takes (ammoung other
+things a container_interface (err... I ended up calling it the
+underlying_iterator_interface in the example), which defines all the
+methods/types that come from the container. This would include the underlying
+iterator type and the begin and end functions for it.
+  Then we inherite from the base providing it with an interface, and it uses
+that to complete the internal logic, so very little has to be re-writen. There
+might have to be another trick for mutible vs. constant pointers, but that
+should be the start.
+  Example:
+
+// The base for the filter iterator
+template<typename ContainerT_, typename underlying_iterator_interface>
+class filter_iterator_base
+{ ... stuff currantly in the main class ... }
+
+// A type that implements the nessary interface operations.
+template<ContainerT_>
+class stl_iterator_interface
+{
+  typedef typename ContainerT_::iterator underlying_iterator;
+  underlying_iterator beginning(ContainerT_ cont)
+  { return cont.begin() }
+  underlying_iterator ending(ContainerT_ cont)
+  { return cont.end(); }
+}
+
+// An example specialization of an iterator
+template<typename ContainerT_>
+class stl_filter_iterator :
+    public filter_interator_base<ContainerT_, stl_iterator_interface>
+{
+  ... some stuff, the majority should be inherited ...
+}
+
+------------------------------------------------------------------------------
 Will I need a filter object? The entire stl seems to use them for some reason.
 Maybe something in the standard functial header?
 
@@ -41,3 +87,5 @@ struct filter
   typedef T argument_type;
   typedef bool result_type;
 };
+
+I
