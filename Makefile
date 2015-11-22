@@ -3,7 +3,7 @@
 # See DevManual.txt for details.
 
 # The names of all of the tools.
-TOOLLIST= hello-world filter-iterator
+TOOLLIST= hello-world filter-it
 
 
 
