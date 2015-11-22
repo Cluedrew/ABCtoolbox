@@ -3,6 +3,11 @@
 
 // WIP: I generally don't like iterators and don't know tones about them.
 
+/* Important: Currantly the defualt constructor creates an invalid object
+ * that you can't really fix. The update functions and some checks will be
+ * needed to fix that.
+ */
+
 /* The filter iterator is a forward iterator that ignores some elements.
  * or it might be a bidirectional operator. Unless I can fined a really clean
  * way to do it I'm probably not going to have the four types of iterators.
@@ -10,9 +15,6 @@
  * Either way I am trying to built it as close to the C++ standard as possible
  * so it fits in. Because of its nature that may not be possible in every case
  * but I will try.
- *
- * Also I should try to make this thing compatable with anon. functions, which
- * is another thing I don't know much about.
  *
  * Features for required for the standard are marked with (req).
  *
@@ -30,14 +32,14 @@ template<typename ContainerT_>
 class FilterIterator
 {
 public:
-  typedef ContainerT_::value_type value_type;
-  typedef bool (*filter_type)(ContainerT_::const_reference);
+  typedef typename ContainerT_::value_type value_type;
+  typedef bool (*filter_type)(typename ContainerT_::const_reference);
 private:
   // Reference to underlying container.
   ContainerT_ * container;
 
   // The underlying iterator.
-  ContainerT_::iterator it;
+  typename ContainerT_::iterator it;
 
   // The value of the filter function.
   filter_type filter;
@@ -63,11 +65,11 @@ public:
   // Pre-Increment (req)
   FilterIterator & operator++ ();
   // Post-Increment (req)
-  FilterIterator & operator++ (int);
+  FilterIterator operator++ (int);
   // Pre-Decrement (req)
   FilterIterator & operator-- ();
   // Post-Decrement (req)
-  FilterIterator & operator-- (int);
+  FilterIterator operator-- (int);
 
   /* About RunTime:
    *   Most iterators preform ++/-- in O(1) time. Because of the additional
@@ -91,7 +93,7 @@ public:
   value_type * operator-> ();
 
   // For the default constructor we will need ways to change the container
-  // and the filter.
+  // and the filter. (Not implemented.)
   void update_container (ContainerT_ * container);
   void update_filter (filter_type filter);
 
@@ -108,38 +110,6 @@ public:
   // Possibly some type conversions to and from other types of iterators.
   // Or at least the "base" iterator.
 };
-
-/* Base iterator type that I might have to inherite from.
-
-template <typename Category, typename T, typename Distance = ptrdiff_t,
-          typename Pointer = T*, typename Reference = T&>
-strucut iterator
-{
-  typedef T         value_type;
-  typedef Distance  difference_type;
-  typedef Pointer   pointer;
-  typedef Reference reference;
-  typedef Category  iterator_catagory;
-};
-
-T will come from the container.
-Category will likely be bidirectional_iterator_tag
- if not then forward_iterator_tag
-
-Then I have to do something with the iterator_traits template... maybe?
-
-Will I need a filter object? The entire stl seems to use them for some reason.
-Maybe something in the standard functial header?
-
-template <class T>
-struct filter
-{
-  bool operator() (T const &) (const)? {...}
-  typedef T argument_type;
-  typedef bool result_type;
-};
-
-*/
 
 }
 

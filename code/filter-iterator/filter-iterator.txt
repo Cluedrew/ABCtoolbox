@@ -1,0 +1,43 @@
+  In order to get the filter iterator up and running (I'm actually making it for a
+different project), I am going to make some short cuts.
+  The public header (the only header right now) will have all the information about
+the currant verison, this just has some plans for the future.
+
+Feature Requests/Ideas:
+* More powerful/more accessable filter options
+  - Working with anon. functions.
+  - Possible filter object type.
+* Four iterator types:
+    iterator, const_iterator, reverse_iterator, const_reverse_iterator
+  - a filter iterator for each of the four base types.
+  - conversion to and from the iterator's base type.
+
+Base iterator type that I might have to inherite from.
+
+template <typename Category, typename T, typename Distance = ptrdiff_t,
+          typename Pointer = T*, typename Reference = T&>
+strucut iterator
+{
+  typedef T         value_type;
+  typedef Distance  difference_type;
+  typedef Pointer   pointer;
+  typedef Reference reference;
+  typedef Category  iterator_catagory;
+};
+
+T will come from the container.
+Category will likely be bidirectional_iterator_tag
+ if not then forward_iterator_tag
+
+Then I have to do something with the iterator_traits template... maybe?
+
+Will I need a filter object? The entire stl seems to use them for some reason.
+Maybe something in the standard functial header?
+
+template <class T>
+struct filter
+{
+  bool operator() (T const &) (const)? {...}
+  typedef T argument_type;
+  typedef bool result_type;
+};
