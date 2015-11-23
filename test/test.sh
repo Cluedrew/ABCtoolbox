@@ -628,9 +628,10 @@ function run_test_manual ()
 # Change to the script's directory so we can cut down on the length of names.
 cd $DIR
 
-update_pt_vars hello hello-test
-update_program hello
-safe_exit
+# err... I forget what this was testing. I hope it was not important.
+#update_pt_vars hello hello-test
+#update_program hello
+#safe_exit
 
 
 

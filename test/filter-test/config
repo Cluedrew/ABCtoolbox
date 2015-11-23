@@ -1,0 +1,10 @@
+  The basic/main testing program for the FilterIterator.
+
+update: g++ filter-test.cpp -L/usr/local/include/ABC -lfilter-it -o filter-test
+
+tools: filter-it
+source-files: filter-test.cpp
+
+test-type: auto
+tests:
+libs:

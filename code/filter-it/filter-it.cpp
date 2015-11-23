@@ -1,4 +1,4 @@
-#include "filter-iterator.hpp"
+#include "filter-it.hpp"
 
 // Implementation of the FilterIterator.
 // Will later be converted to a epp/tpp file
@@ -28,6 +28,16 @@ FilterIterator<ContainerT_>::FilterIterator
   if (!filter(*it))
      this->operator++();
 }
+// Identical Full Constructor, except this one handles the derefencing.
+template<typename ContainerT_>
+FilterIterator<ContainerT_>::FilterIterator
+    (ContainerT_ & container, filter_type filter) :
+  container(&container), it(container.begin()), filter(filter)
+{
+  // If the beginning element is filtered out, move onto one that is not.
+  if (!filter(*it))
+     this->operator++();
+}
 
 // Default Constructor (req)
 //template<typename ContainerT_>
@@ -37,7 +47,8 @@ FilterIterator<ContainerT_>::FilterIterator
 
 // Copy Constructor (req)
 template<typename ContainerT_>
-FilterIterator<ContainerT_>::FilterIterator (FilterIterator const & other) :
+FilterIterator<ContainerT_>::FilterIterator
+    (FilterIterator<ContainerT_> const & other) :
   container(other.container), it(other.it), filter(other.filter)
 {}
 
@@ -52,7 +63,7 @@ FilterIterator<ContainerT_>::~FilterIterator()
 // Copy Assignment (req)
 template<typename ContainerT_>
 FilterIterator<ContainerT_> & FilterIterator<ContainerT_>::operator=
-    (FilterIterator const & other)
+    (FilterIterator<ContainerT_> const & other)
 {
   container = other.container;
   it = other.it;
@@ -60,20 +71,21 @@ FilterIterator<ContainerT_> & FilterIterator<ContainerT_>::operator=
 }
 
 // Move Constrctor
-template<typename ContainerT_>
-FilterIterator<ContainerT_>::FilterIterator (FilterIterator const && other) :
-  container(other.container), it(other.it), filter(other.filter)
-{}
+//template<typename ContainerT_>
+//FilterIterator<ContainerT_>::FilterIterator
+//    (FilterIterator<ContainerT_> && other) :
+//  container(other.container), it(other.it), filter(other.filter)
+//{}
 
 // Move Assignment
-template<typename ContainerT_>
-FilterIterator<ContainerT_> & FilterIterator<ContainerT_>::operator=
-    (FilterIterator const && other)
-{
-  container = other.container;
-  it = other.it;
-  filter = other.filter;
-}
+//template<typename ContainerT_>
+//FilterIterator<ContainerT_> & FilterIterator<ContainerT_>::operator=
+//    (FilterIterator<ContainerT_> && other)
+//{
+//  container = other.container;
+//  it = other.it;
+//  filter = other.filter;
+//}
 
 // Increments and Decrements =================================================
 // The implementation of ++/-- is were the filter actually happens.

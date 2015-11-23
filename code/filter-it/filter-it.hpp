@@ -31,20 +31,21 @@ protected:
 public:
   // Full Constructor
   FilterIterator (ContainerT_ * container, filter_type filter);
+  FilterIterator (ContainerT_ & container, filter_type filter);
 
   // Default Constructor (req)
   //FilterIterator ();
   // Copy Constructor (req)
-  FilterIterator (FilterIterator const & other);
+  FilterIterator (FilterIterator<ContainerT_> const & other);
   // Deconstructor (req)
   virtual ~FilterIterator();
   // Copy Assignment (req)
-  FilterIterator & operator= (FilterIterator const & other);
+  FilterIterator & operator= (FilterIterator<ContainerT_> const & other);
 
   // Move Constrctor
-  FilterIterator (FilterIterator const && other);
+  //FilterIterator (FilterIterator<ContainerT_> && other);
   // Move Assignment
-  FilterIterator & operator= (FilterIterator const && other);
+  //FilterIterator & operator= (FilterIterator<ContainerT_> && other);
 
   // Pre-Increment (req)
   FilterIterator & operator++ ();
@@ -67,9 +68,9 @@ public:
 
 
   // Equality Check
-  bool operator== (FilterIterator const & other);
+  bool operator== (FilterIterator<ContainerT_> const & other);
   // Inequality Check
-  bool operator!= (FilterIterator const & other);
+  bool operator!= (FilterIterator<ContainerT_> const & other);
 
   // Dereference (req)
   value_type & operator* ();

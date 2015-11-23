@@ -124,6 +124,10 @@ Tool List:====================================================================
 hello-world: Prints out a simple hello world message for testing.
 
 WIP:
+filter-it: A special iterator that skips over some items to filter them out.
+  Works with various STL containers.
+
+WIP:
 set: The STL set I find to be a little lacking, so I thought I might try and
   fix it or add onto it.
 TOBE: Add some optiomiations (hints might do something) and maybe expand it
