@@ -36,48 +36,103 @@ namespace abc
 {
 
 // The base for the filter iterator
-template<typename container_type, typename underlying_interface, typename filter_type = filter<T> >
+template<typename underlying_interface, typename filter_type = filter<T> >
 class filter_iterator_base
                       // This will define all the iterators 'component' typedefs.
                       // Get from underlying_interface ? ( X typename underlying_interface::X ?)
-    : public iterator<typename Category,
+    : public iterator<typename Category, // Limited to forward?
                       typename T,
                       typename Distance = ptrdiff_t,
                       typename Pointer = T*,
                       typename Reference = T&>
 {
-public:
+private:
   // Access to the underlying interator type
   typedef typename underlying_interface::iterator underlying_iterator;
-private:
+  // The interface to the underlying iterator.
+  underlying_interface uInter;
+  // The filter instance, must have function bool(*)(value_type)
+  filter_type filter;
+  // The iterator we use itself.
+  iterator it;
 protected:
+  // Advance in internal iterator (at least zero times) to reach a
+  // non-filtered out item.
+  void AdvanceZero ()
+  {
+     while (*it != uInter.end() && !filter(*it)) ++it;
+  }
 public:
+  // I think it will inharite the category, value_type and so on from the
+  // iterator type. Or do I have to do the round about thing that
+  // reverse_iterator does? (Why else would they do it?)
+
+  filter_iterator_base(
+    underlying_interface uInterface = underlying_interface(),
+    filter_type filter = filter_type()) :
+      uInter(uInter), filter(filter), it(uInter.begin())
+  {}
+  // Constructor is all optional arguments. The iterator is default construtable if both
+  // the underlying_interface and filter_type are.
+  // Variant to give just the filter.
+  filter_iterator_base(filter_type filter) :
+      uInter(), filter(filter), it(uIter.begin())
+  {}
+
   // ... stuff currantly in the main class ...
+  /* TODO
+  filter_iterator_base(filter_interator_base<underlying_interator,
+                                             filter_type>          const & other)
+  operator++()
+  operator++(int)
+  operator--() ?
+  operator--(int) ?
+  operator bool () ?
+  operator! () ?
+  */
 }
 
 // A type that implements the nessary interface operations.
 template<container_type>
-struct stl_iterator_interface
+class stl_iterator_interface
 {
-  typedef typename ContainerT_::iterator iterator;
-  underlying_iterator beginning(ContainerT_ cont)
+private:
+  container_type & cont;
+protected:
+public:
+  stl_iterator_interface(container_type & container) :
+      cont(container)
+  {}
+
+  typedef typename container_type::iterator iterator;
+  typedef typename container_type::value_type value_type;
+
+  iterator begin(container_type cont)
   { return cont.begin(); }
-  underlying_iterator ending(ContainerT_ cont)
+  iterator end(container_type cont)
   { return cont.end(); }
 }
 
+// If I inhearit I would have to do from a base class without the defines.
+// Which is the only thing I wouldn't have to re-define anyways. Skip.
+
+// The other three stl container wrappers.
+// They just 'wrap' on of the other kinds of iterators as a plain iterator.
+// ... maybe I shouldn't call it 'iterator'... is that missleading?
+//class stl_const_iterator_interface
+//class stl_reverse_iterator_interface
+//class stl_const_reverse_iterator_interface
+
+
+// The absolute minimum should be in these classes.
+// Infact they just be the class declaration and a construtor each ideally.
 // An example specialization of an iterator
-template<typename container_type, typename filter = filter<T> >
+template<typename container_type, typename filter_type = filter<T> >
 class stl_filter_iterator :
-    public filter_interator_base<container_type, stl_iterator_interface<container_type>, filter>
+    public filter_interator_base<stl_iterator_interface<container_type>, filter>
 {
-private:
-  // Should be a reference or pointer.
-  container_type cont;
-protected:
-public:
-  stl_filter_iterator(container_type container) :
-      cont(container)
+  stl_filter_iterator(container_type & container, filter_type filter = filter_type()) :
+      filter_iterator(stl_iterator_iterface(container), filter)
   {}
 
   // ... some stuff, the majority should be inherited ...
@@ -99,7 +154,9 @@ struct iterator
 template<typename T>
 struct filter
 {
-  virtual bool operator() (T const &) (const)? {...}
+  // Filters out NULLs and 0s and so on.
+  virtual bool operator() (T const & t) const
+  { return bool(t); }
   typedef T argument_type;
   typedef bool result_type;
 };
