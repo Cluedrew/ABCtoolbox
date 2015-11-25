@@ -1,0 +1,17 @@
+#! /bin/bash
+
+# Clear copy
+# .clcp [SOURCE] [DEST]
+
+# A wrapper around copy. If the SOURCE does not exist and the DEST does, then
+# instead of copying the file over the DEST is removed.
+
+# This to make sure that a tpp file, if used, is copied over with the public
+# header, but if it is not used then no .tpp file for that header is in the
+# include directory. ( ./.clcp $(<:hpp=tpp) $(@:hpp=tpp) )
+
+if [ -e $1 ]; then
+  cp -T $1 $2
+elif [ -e $2 ]; then
+  rm $2
+fi

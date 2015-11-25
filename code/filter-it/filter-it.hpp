@@ -91,11 +91,11 @@ public:
   operator bool ();
   // Out of Range Check (?)
   bool operator! ();
-
-  // Possibly some type conversions to and from other types of iterators.
-  // Or at least the "base" iterator.
 };
 
 }
+
+// Implementation of template.
+#include "filter-it.tpp"
 
 #endif//FILTER_ITERATOR_HPP
