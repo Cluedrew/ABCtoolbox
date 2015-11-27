@@ -30,37 +30,69 @@ function every time. I will probably write out and include a few classes that
 can be used (such as one that checks for equality with its construtor argument
 or one that is just a wrapper around a function pointer... or would you just
 use the function pointer directly then?)
+
+  I have based as much of the naming conventions after the stl as I could.
+  Also my main problem right now is that I can mimic every property of the
+bidirectional iterator except the default (zero-arg) constructor which also
+means that it isn't even a forward operator. But if the base types are not
+default construtable than what am I supposed to do? And even if I have a work-
+around (say pointers) it doesn't work without those parts.
+  I think making a weird work around to create a random-access iterator would
+be easier (although I would just be mapping references to a vector).
+
+template<typename iterator_catagory_>
+struct cap_iterator_catagory_at_bidirectional (shorten)
+{ typedef iterator_catagory_ iterator_catagory; }
+template<>
+struct cap_iterator_catagory_at_bidirectional<random_access_iterator_tag>
+{ typedef bidirectional_iterator_tag iterator_catagory; }
 */
 
 namespace abc
 {
 
 // The base for the filter iterator
-template<typename underlying_interface, typename filter_type = filter<T> >
+template<typename base_interface, typename filter_type = filter<T> >
 class filter_iterator_base
-                      // This will define all the iterators 'component' typedefs.
-                      // Get from underlying_interface ? ( X typename underlying_interface::X ?)
     : public iterator<typename Category, // Limited to forward?
-                      typename T,
-                      typename Distance = ptrdiff_t,
-                      typename Pointer = T*,
-                      typename Reference = T&>
+                      typename base_interface::iterator::value_type,
+                      typename Distance = ptrdiff_t, // Default?
+                      typename Pointer = T*, // Default?
+                      typename Reference = T&> // Default?
 {
 private:
-  // Access to the underlying interator type
-  typedef typename underlying_interface::iterator underlying_iterator;
+  // Access to the underlying interator type.
+  // One name that makes sense, one to match the stl.
+  typedef typename base_interface::iterator_type iterator_type;
+  typedef typename base_interface::iterator_type base_iterator;
   // The interface to the underlying iterator.
-  underlying_interface uInter;
+  base_interface baseInter;
   // The filter instance, must have function bool(*)(value_type)
   filter_type filter;
   // The iterator we use itself.
-  iterator it;
+  base_iterator it;
 protected:
   // Advance in internal iterator (at least zero times) to reach a
   // non-filtered out item.
-  void AdvanceZero ()
+  void advanceZero ()
   {
-     while (*it != uInter.end() && !filter(*it)) ++it;
+    while (it != baseInter.end() && !filter(*it)) ++it;
+  }
+  // Advance the internal iterator (at least one time) to reach a
+  // non-filtered out item.
+  void advanceOne ()
+  {
+    do ++it
+    while (it != baseInter.end() && !filter(*it));
+  }
+  // Advance the iterator in the other direction (at least once) to reach a
+  // non-filtered out item. Except when we are already at the beginning, then
+  // don't move the iterator.
+  void retreatOne ()
+  {
+    if (it != baseInter.begin())
+      do --it
+      while (it != baseInter.begin() && !filter(*it));
   }
 public:
   // I think it will inharite the category, value_type and so on from the
@@ -68,28 +100,84 @@ public:
   // reverse_iterator does? (Why else would they do it?)
 
   filter_iterator_base(
-    underlying_interface uInterface = underlying_interface(),
+    base_interface baseInter = base_interface(),
     filter_type filter = filter_type()) :
-      uInter(uInter), filter(filter), it(uInter.begin())
-  {}
+      baseInter(baseInter), filter(filter), it(baseInter.begin())
+  { advanceZero(); }
   // Constructor is all optional arguments. The iterator is default construtable if both
   // the underlying_interface and filter_type are.
   // Variant to give just the filter.
   filter_iterator_base(filter_type filter) :
-      uInter(), filter(filter), it(uIter.begin())
-  {}
+      baseInter(), filter(filter), it(baseIter.begin())
+  { advanceZero(); }
 
-  // ... stuff currantly in the main class ...
-  /* TODO
-  filter_iterator_base(filter_interator_base<underlying_interator,
-                                             filter_type>          const & other)
-  operator++()
-  operator++(int)
-  operator--() ?
-  operator--(int) ?
-  operator bool () ?
-  operator! () ?
-  */
+  // Dereference Operator
+  value_type & operator* ()
+  {
+    return it.operator*();
+  }
+  // Member Dereference Operator
+  value_type * operator-> ()
+  {
+    return it.operator->();
+  }
+
+  // Pre-Increment Operator
+  filter_iterator<base_interface, filter_type> & operator++ ()
+  {
+    advanceOne();
+    return *this;
+  }
+  // Post-Increment Operator
+  filter_iterator<base_interface, filter_type> operator++ (int)
+  {
+    filter_iterator<base_interface, filter_type> tmp = *this;
+    advanceOne();
+    return tmp;
+  }
+  // Pre-Decrement Operator
+  filter_iterator<base_interface, filter_type> & operator-- ()
+  {
+    retreatOne();
+    return *this;
+  }
+  // Post-Decrement Operator
+  filter_iterator<base_interface, filter_type> operator-- (int)
+  {
+    filter_iterator<base_interface, filter_type> tmp = *this;
+    retreatOne();
+    return tmp;
+  }
+
+  // Boolean Conversion (is valid)
+  operator bool ()
+  {
+    return it != baseInter.end();
+  }
+  // Boolean Negation (is invalid)
+  bool operator! ()
+  {
+    return it == baseInter.end();
+  }
+
+  // baseInter Member Access
+  base_interface & getInterface ()
+  {
+    return baseInter;
+  }
+  base_interface const & getInterface ()
+  {
+    return baseInter;
+  }
+  // filter Member Access
+  filter_type & getFilter ()
+  {
+    return filter;
+  }
+  filter_type const & getFilter ()
+  {
+    return filter;
+  }
 }
 
 // A type that implements the nessary interface operations.
@@ -104,12 +192,13 @@ public:
       cont(container)
   {}
 
-  typedef typename container_type::iterator iterator;
+  typedef typename container_type::iterator iterator_type;
+  typedef typename container_type::iterator_catagory iterator_catagory;
   typedef typename container_type::value_type value_type;
 
-  iterator begin(container_type cont)
+  iterator_type begin(container_type cont)
   { return cont.begin(); }
-  iterator end(container_type cont)
+  iterator_type end(container_type cont)
   { return cont.end(); }
 }
 
@@ -134,8 +223,6 @@ class stl_filter_iterator :
   stl_filter_iterator(container_type & container, filter_type filter = filter_type()) :
       filter_iterator(stl_iterator_iterface(container), filter)
   {}
-
-  // ... some stuff, the majority should be inherited ...
 }
 
 /*

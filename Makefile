@@ -7,6 +7,7 @@ TOOLLIST= hello-world filter-it
 
 
 
+### Main Variable Declaration:
 # Access Link Varibles:
 LINKDIR=/usr/local/include
 LINKNAME=$(LINKDIR)/ABC
@@ -14,8 +15,6 @@ LINKDEST=/home/cluedrew/ABCtoolbox/include # *
 # The system is likely to be replaced eventually with a proper install.
 # * This should be replaced that finds the location of this file, so it always
 #   gets the correct location of /include.
-
-
 
 # Compiler Varaibles:
 CXX=gcc
@@ -39,11 +38,11 @@ TSTDIR=test
 
 
 
-# Special Rules:
+### Special Rules:
 .PHONY : all clean deepclean $(TOOLLIST) link delink
 .SECONDEXPANSION :
 
-# Misc Varibles:
+### Misc Varibles:
 # All .cpp Files
 ALLCPP= $(wildcard $(SORDIR)/*/*.cpp)
 # Intermediate Objects
@@ -57,16 +56,29 @@ DEPEND= $(INTOBJ:.o=.d)
 $(foreach tool,$(TOOLLIST), \
 	$(eval $(tool)_OBJ= $(filter $(OBJDIR)/$(tool)/%.o,$(INTOBJ))))
 
-# Functions:
+
+
+### Functions:
+# Expands to the contents of the file $(1) if file exists.
+#   If the file does not exist expands to the empty string.
+safecat= $(shell [ -e $(1) ] && cat $(1))
+
 # Turns the names of tools it is given to the names of the tool's final
 #   files, toollib is the library file, toolhead is the public header and
 #   end files produces both.
 endfiles= $(foreach tool,$(1),$(LIBDIR)/$(tool).hpp $(LIBDIR)/lib$(tool).a)
 toollib = $(foreach tool,$(1),$(LIBDIR)/lib$(tool).a)
 toolhead= $(foreach tool,$(1),$(LIBDIR)/$(tool).hpp)
-# Expands to the contents of the file $(1) if file exists.
-#   If the file does not exist expands to the empty string.
-safecat= $(shell [ -e $(1) ] && cat $(1))
+# Replacement for all toolhead, instead of grabbing a single header it will
+#   check for a 'pub' (name pending) file in the tool's source directory, if
+#   none exists it (or if it is empty?) it expand to the "default" header that
+#   is the same as the one from toolhead. If there is a 'pub' file it will
+#   create a list of every (hpp and tpp) file in the it, all of which are
+#   copied over.
+# There are two problems, one is connecting the source file to the target file
+#   and the other is that it goes outside of some of the naming conventions I
+#   made to avoid colitions.
+#toolpub= $(foreach tool,$(1),...)
 
 
 
