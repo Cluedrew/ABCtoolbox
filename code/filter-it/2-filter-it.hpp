@@ -60,13 +60,14 @@ class filter_iterator_base
                       typename Pointer = T*, // Default?
                       typename Reference = T&> // Default?
 {
-private:
+public:
   // Access to the underlying interator type.
   // One name that makes sense, one to match the stl.
   typedef typename base_interface::iterator_type iterator_type;
   typedef typename base_interface::iterator_type base_iterator;
+private:
   // The interface to the underlying iterator.
-  base_interface baseInter;
+  base_iterator baseInter;
   // The filter instance, must have function bool(*)(value_type)
   filter_type filter;
   // The iterator we use itself.
@@ -150,12 +151,12 @@ public:
   }
 
   // Boolean Conversion (is valid)
-  operator bool ()
+  operator bool () const
   {
     return it != baseInter.end();
   }
   // Boolean Negation (is invalid)
-  bool operator! ()
+  bool operator! () const
   {
     return it == baseInter.end();
   }
@@ -165,7 +166,7 @@ public:
   {
     return baseInter;
   }
-  base_interface const & getInterface ()
+  base_interface const & getInterface () const
   {
     return baseInter;
   }
@@ -174,7 +175,7 @@ public:
   {
     return filter;
   }
-  filter_type const & getFilter ()
+  filter_type const & getFilter () const
   {
     return filter;
   }
@@ -218,7 +219,8 @@ public:
 // An example specialization of an iterator
 template<typename container_type, typename filter_type = filter<T> >
 class stl_filter_iterator :
-    public filter_interator_base<stl_iterator_interface<container_type>, filter>
+    public filter_interator_base<stl_iterator_interface<container_type>,
+                                 filter_type>
 {
   stl_filter_iterator(container_type & container, filter_type filter = filter_type()) :
       filter_iterator(stl_iterator_iterface(container), filter)
@@ -248,13 +250,22 @@ struct filter
   typedef bool result_type;
 };
 
-template<typename T>
+template<typename T/*, typename commaritor = equal_to<T> */>
 struct equals_filter : public filter<T>
 {
   T equals_to;
   equals_filter (T equals_to) : equals_to(equals_to) {}
   virtual bool operator() (T const & t) (const)?
   { return equals_to == t; }
+};
+
+template<typename T>
+struct func_filter : public filter<T>
+{
+  bool (*func) (T const &);
+  func_filter (bool(*func)(T const &)) : func(func) {}
+  virtual bool operator() (T const & t) const
+  { return func(t); }
 };
 
 }

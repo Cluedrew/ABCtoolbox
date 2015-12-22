@@ -1,0 +1,56 @@
+So the test harness is almost 700 lines of code. Although it is 
+currantly working it is actually far too big to for me to mantain and 
+upgrade. Or its dangerously close to the line.
+
+I think the single biggest thing I can do to make it more mantainable is 
+to break the line script into moduals across different files. The 
+currant header script, test.sh, will be used as a header of sorts and 
+distribute work to helpers in an internal directory.
+
+The main question that I have to answer is to go python or stay bash. I 
+would like to stay bash because that is were my experties is, I think 
+there should be less re-writing involved and it forces a higher degree 
+of modularity (for instance I can't port globals, which is one of the 
+currant things that is confusing).
+
+Question: How are signals handled with multiple scripts/subshells?
+
+So first re-designing what I have.
+
+Moduals 1: (?? ::= sh | py)
+
+  test.??: Head script, this is the one the user (or make) actually 
+calls. It checks the parameters and distriputes work to the other 
+moduals. It also sets the working directory to a predicatble location 
+for them and a few other similar things. Also the only one not in the 
+subdirectory.
+  (--send-to=MODUAL for testing, this must be the first agrument, send
+all other aguments to the given MODUAL)
+
+  run-auto.??: Run an automatic test.
+  run-manu.??: Run a manual test.
+  As now, these tests should have very similar interfaces. Run a single 
+test and record the result in a *.res file. The manual tests are meant 
+to be interactive while auto tests use redirection. Manual tests are 
+really for things that auto tests can't cover.
+
+  update-program.??: Update the program, (re)compiling it to use the 
+latest versions of the tools/lib*.a from the tool box. May also delete 
+*.res files for tests using that program.
+  There are three update methods I think I will implement. First run a 
+make command on the directory (allowing for a Makefile). Second grab a 
+text command and run that. Third compile all the *.c files in the 
+directory and compile them with all used tools.
+
+  parse-for.??: Read the config file and the *.tst files. Low-level 
+helper that does little by itself. The two types of files should use 
+similar formats anyways so a single reader for the two should be fine. 
+Also the output should never/rarely require any additional processing.
+
+  tmp-index.??: A handler for temperary files. As it is not run 
+continuously it may need its own file with information on the temperary 
+files. Also since it is its own script here batches of jobs should be 
+included. It might be better to handle tmp files localy, maybe.
+
+  ask.??: Ask a yes or no question and get an answer. Mostly used in a 
+manual test but making it its own stand alone works.
