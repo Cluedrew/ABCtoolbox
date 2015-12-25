@@ -1,6 +1,22 @@
 # Make file for the ABC Tool Box:
-# Working, but not fully tested.
 # See DevManual.txt for details.
+
+###
+#
+# Currantly there is an issue with this set up, I have realized that I am not
+# nessasily going to provide a header and an exicutable for every tool, plus
+# I may include other files, such as tpp files, or do a number of other things
+# to create my output files. Not only does the Makefile not support these
+# options but there is no easy way to add them in its currant form. So I need
+# to fix it. In addition to what I have currantly:
+# * An easy way to check if certain files (the public header, the origin cpp)
+#   exist for a particular tool.
+# * Conditional dependances, for instance files with no origin cpp will not
+#   have a lib*.a file made for them.
+# * Possibly something for stitching files together for 'single header'
+#   exports. (Or header and header extention, I like clean headers.)
+#
+###
 
 # The names of all of the tools.
 TOOLLIST= hello-world filter-it
@@ -69,16 +85,6 @@ safecat= $(shell [ -e $(1) ] && cat $(1))
 endfiles= $(foreach tool,$(1),$(LIBDIR)/$(tool).hpp $(LIBDIR)/lib$(tool).a)
 toollib = $(foreach tool,$(1),$(LIBDIR)/lib$(tool).a)
 toolhead= $(foreach tool,$(1),$(LIBDIR)/$(tool).hpp)
-# Replacement for all toolhead, instead of grabbing a single header it will
-#   check for a 'pub' (name pending) file in the tool's source directory, if
-#   none exists it (or if it is empty?) it expand to the "default" header that
-#   is the same as the one from toolhead. If there is a 'pub' file it will
-#   create a list of every (hpp and tpp) file in the it, all of which are
-#   copied over.
-# There are two problems, one is connecting the source file to the target file
-#   and the other is that it goes outside of some of the naming conventions I
-#   made to avoid colitions.
-#toolpub= $(foreach tool,$(1),...)
 
 
 
