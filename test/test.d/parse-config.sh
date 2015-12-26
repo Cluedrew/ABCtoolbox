@@ -2,6 +2,13 @@
 
 # Get information from a configuration file.
 # === Unimplemented ===
+# Usage:
+# parse-config.sh [OPTIONS] [--] [FILE...] SEARCH
+#
+# -f --flag
+# -s --setting
+# -F --file=
+# -c --confict=
 
 # Get Setting: Return part of a line from a file.
 # Usage: get_setting [FILE...] LINEMARK

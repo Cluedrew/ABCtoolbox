@@ -2,6 +2,10 @@
 
 # Run a automatic test.
 # === Unimplemented ===
+# Usage:
+# run-auto.sh PROGRAM TEST
+#   Assumes currant directory is the test directory.
+#   Runs the TEST for PROGRAM as an automatic test.
 
 # run_test_*
 #   The test functions all run tests, they all have the same interface and
@@ -16,6 +20,9 @@
 # 2 - Test error
 # 3 - Set up error (missing files, etc.)
 # 4 - Fault occured
+
+# Get the test directory.
+TEST_DIR=$( pwd )
 
 # Usage: run_test_auto PROGRAM TEST
 # Runs an auto test with in, out & err files.

@@ -2,6 +2,15 @@
 
 # Handler for temperary files.
 # === Unimplemented ===
+# Usage:
+# tmp-files.sh request [FILES...]
+# tmp-files.sh release [FILES...]
+# tmp-files.sh purge
+
+# Should always be called from the TEST_DIR
+TEST_DIR=$( pwd )
+
+# Temperary
 
 # Make a temp file and add it to templist at INDEX.
 # tempfileindex COMMAND INDEX

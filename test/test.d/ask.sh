@@ -1,12 +1,17 @@
-# ash.sh: Ask a yes or no question and return the result.
-# Usage: ask.sh PROMPT...
-# Asks a question using the text in PROMPT followed by " (y/n): " before
+#!/bin/bash
+
+# Ask the user a yes or no question and return the answer.
+
+# Usage:
+# ask.sh PROMPT...
+#   Asks a question using the text in PROMPT followed by " (y/n): " before
 #   asking for the answer. If then answer is not reconized another question
 #   is echoed with prompt replaced by text explaining the input.
 # Exit Codes:
 # 0: Answer is y.
 # 1: Answer is n.
 # 2: Too many tries.
+
 function ask_question ()
 {
   local tries=1
@@ -34,4 +39,4 @@ function ask_question ()
 }
 
 ask_question $*
-return $?
+exit $?
