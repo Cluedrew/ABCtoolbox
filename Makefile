@@ -67,10 +67,24 @@ INTOBJ= $(patsubst $(SORDIR)%.cpp,$(OBJDIR)%.o,$(ALLCPP))
 FINOBJ= $(patsubst %,$(OBJDIR)/%.o,$(TOOLLIST))
 # Dependancy Files
 DEPEND= $(INTOBJ:.o=.d)
+
 # Creates a *_OBJ varible for each tool. Each varible holds the intermediate
-#   objects for that tool.
+#   object files for that tool.
 $(foreach tool,$(TOOLLIST), \
 	$(eval $(tool)_OBJ= $(filter $(OBJDIR)/$(tool)/%.o,$(INTOBJ))))
+
+# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+# Creates a *_TARGET variable for each tool. Each variable holds the final
+#   targets assosated with each tool.
+$(foreach tool,$(TOOLLIST), \
+	$(eval $(tool)_TARGET= \
+# A public header will always be used. (hpp => hpp)
+	$(LIBDIR)/$(tool).hpp \
+# A compiled binary might be used. (cpp => lib_.a)
+	$(if ?,$(LIBDIR)/lib$(tool).a) \
+# A template/header extentention file might be used. (tpp => tpp)
+# Can I stich together multiple files here?
+	$(if ?,$(LIBDIR)/$(tool).tpp) )
 
 
 
@@ -86,6 +100,12 @@ endfiles= $(foreach tool,$(1),$(LIBDIR)/$(tool).hpp $(LIBDIR)/lib$(tool).a)
 toollib = $(foreach tool,$(1),$(LIBDIR)/lib$(tool).a)
 toolhead= $(foreach tool,$(1),$(LIBDIR)/$(tool).hpp)
 
+# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+# Get the contents of every #include "%" statement in the file $(1).
+get_local_include=$(patsubst include "%",%, \
+	$(shell egrep "include \".*\" " $(1)))
+# If I can get this, and then call it recursively, than I could make that
+# sticking program I wanted.
 
 
 ### Rules:
@@ -94,7 +114,7 @@ toolhead= $(foreach tool,$(1),$(LIBDIR)/$(tool).hpp)
 all : $(TOOLLIST)
 
 # Tool level rule, create all final files for a tool.
-$(TOOLLIST) : $(LIBDIR)/lib$$@.a $(LIBDIR)/$$@.hpp
+$(TOOLLIST) : $(LIBDIR)/lib%.a $(LIBDIR)/%.hpp
 
 # Create the static library in the include directory.
 $(LIBDIR)/lib%.a : $(OBJDIR)/%.o | $(LIBDIR)
@@ -148,6 +168,5 @@ clean :
 
 # deepclean phony rule. Removes all generated files.
 deepclean : clean
-	-rm $(call endfiles,$(TOOLLIST))
-	-rm $(LIBDIR)/*.tpp
+	-rm $(LIBDIR)/*.{hpp,a,tpp}
 	-rmdir $(LIBDIR)
