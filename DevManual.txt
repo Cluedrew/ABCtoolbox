@@ -21,13 +21,17 @@ File Structure:===============================================================
 |
 |UsersManual.txt: Information about using the ABC tool box's tools.
 |
+|Makefile: Project's make file. Creates tools and the export directory.
+|
 ||include: The export directory, sort of a temperary measure while I work on it
 ||  (and discover how to do it properly). Contains the header file for each
 ||  tool as well as the library file.
 ||
-||<tool>.hpp: Public header for each tool.
+||<tool>.hpp: Public header for tool.
 ||
-||lib<tool>.a: Static library for each tool.
+||lib<tool>.a: Static library for tool.
+||
+||<tool>.tpp: Template file for tool.
 |
 ||code: Contains all the raw code and other similar files created by hand.
 ||
