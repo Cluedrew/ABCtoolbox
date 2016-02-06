@@ -1,5 +1,5 @@
-#ifndef ABCDEF_HELLO_WORLD_H
-#define ABCDEF_HELLO_WORLD_H 1.0
+#ifndef ABCDEF_HELLO_WORLD_HPP
+#define ABCDEF_HELLO_WORLD_HPP 1.0
 
 // Connection testing tool.
 
@@ -17,4 +17,4 @@ void HelloWorld (void);
  */
 }
 
-#endif//ABCDEF_HELLO_WORLD_H
+#endif//ABCDEF_HELLO_WORLD_HPP

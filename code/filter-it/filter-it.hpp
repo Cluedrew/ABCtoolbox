@@ -1,5 +1,5 @@
-#ifndef FILTER_IT_HPP
-#define FILTER_IT_HPP
+#ifndef ABDDEF_FILTER_IT_HPP
+#define ABCDEF_FILTER_IT_HPP 1.0
 
 /* Filter iterator class templates and related definitions.
  *
@@ -300,4 +300,4 @@ class filter_iterator_base
 
 }
 
-#endif//FILTER_IT_HPP
+#endif//ABCDEF_FILTER_IT_HPP
